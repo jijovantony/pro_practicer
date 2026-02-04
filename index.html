@@ -674,6 +674,8 @@
             <select id="scaleType" title="Scale type">
               <option value="major">MAJOR</option>
               <option value="minor">NATURAL MINOR</option>
+              <option value="major_chords">MAJOR CHORDS</option>
+              <option value="minor_chords">MINOR CHORDS</option>
             </select>
           </div>
 
@@ -1737,12 +1739,62 @@ function normalizeNoteName(n){
   return s.length === 1 ? s.toUpperCase() : (s[0].toUpperCase() + s.slice(1));
 }
 
-// Canonical 12-note wheel used for fallback math + note-to-midi conversion.
-const CHROMATIC = ["c","C#","d","D#","e","f","F#","g","G#","a","A#","b"];
+// ---------------------------------------------------------------------
+// Two separate chromatic spellings:
+// - CHROMATIC_NOTES: used for NOTE practice + MIDI pitch mapping (sharp spelling)
+// - CHROMATIC_CHORDS: used for CHORD labels (flat spelling by default)
+//   (So you can display chords as Db / Eb / Gb / Ab / Bb instead of C# / D# / F# / G# / A#)
+// ---------------------------------------------------------------------
+
+// Used for NOTE lists and pitch math
+const CHROMATIC_NOTES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+
+// Used for CHORD labels (you can edit this list to your preferred spelling)
+const CHROMATIC_CHORDS = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
 
 // Steps for major / natural minor scales (in semitones)
 const MAJOR_STEPS = [0,2,4,5,7,9,11];
 const MINOR_STEPS = [0,2,3,5,7,8,10];
+
+// Enharmonic mapping to match CHROMATIC_CHORDS roots when the user selects sharps
+const SHARP_TO_FLAT = {
+  "C#":"Db",
+  "D#":"Eb",
+  "F#":"Gb",
+  "G#":"Ab",
+  "A#":"Bb"
+};
+
+// Build scale array of 7 notes from root + type, using a chosen chromatic spelling.
+// This is the core "math" builder for unmapped instruments/keys.
+function buildScaleWithChromatic(root, type, chromatic){
+  let r = normalizeNoteName(root);
+
+  // If we are using chord chromatic, convert sharp roots to their flat names when needed
+  if(chromatic === CHROMATIC_CHORDS && SHARP_TO_FLAT[r]) r = SHARP_TO_FLAT[r];
+
+  const rootIdx = chromatic.indexOf(r);
+  const steps = (type === "minor") ? MINOR_STEPS : MAJOR_STEPS;
+
+  if(rootIdx < 0){
+    // safe fallback
+    return (chromatic === CHROMATIC_CHORDS)
+      ? ["C","D","Eb","F","G","Ab","Bb"]
+      : ["C","D","E","F","G","A","B"];
+  }
+
+  return steps.map(semi => chromatic[(rootIdx + semi) % 12]);
+}
+
+// NOTE fallback: sharp spelling
+function buildScale(root, type){
+  return buildScaleWithChromatic(root, type, CHROMATIC_NOTES);
+}
+
+// CHORD fallback: flat spelling
+function buildChordScale(root, type){
+  return buildScaleWithChromatic(root, type, CHROMATIC_CHORDS);
+}
 
 // Bass Guitar (MAJOR) key map provided by you
 const BASS_KEYS_MAJOR = [
@@ -1754,14 +1806,17 @@ const BASS_KEYS_MAJOR = [
   { name: "A",  scale: ["a","b","C#","d","e","F#","G#"] },
   { name: "B",  scale: ["b","c","d","D#","f","g","a"] },
 ];
+
+// Bass Guitar (NATURAL MINOR) key map (Aeolian) - added per your request
+// Natural minor degrees: 1 2 b3 4 5 b6 b7
 const BASS_KEYS_MINOR = [
-  { name: "C",  scale: ["c","d","D#","f","g","G#","A#"] },
-  { name: "D",  scale: ["d","e","f","g","a","A#","c"] },
-  { name: "E",  scale: ["e","F#","g","a","b","c","d"] },
-  { name: "F",  scale: ["f","g","G#","A#","c","C#","D#"] },
-  { name: "G",  scale: ["g","a","A#","c","d","D#","f"] },
-  { name: "A",  scale: ["a","b","c","d","e","f","g"] },
-  { name: "B",  scale: ["b","C#","d","e","F#","g","a"] },
+  { name: "C",  scale: ["C","D","D#","F","G","G#","A#"] },
+  { name: "D",  scale: ["D","E","F","G","A","A#","C"] },
+  { name: "E",  scale: ["E","F#","G","A","B","C","D"] },
+  { name: "F",  scale: ["F","G","G#","A#","C","C#","D#"] },
+  { name: "G",  scale: ["G","A","A#","C","D","D#","F"] },
+  { name: "A",  scale: ["A","B","C","D","E","F","G"] },
+  { name: "B",  scale: ["B","C#","D","E","F#","G","A"] },
 ];
 
 // Instrument map (extend this later with your own keys / chord-code systems)
@@ -1769,7 +1824,6 @@ const INSTRUMENT_KEYMAP = {
   bass: {
     major: BASS_KEYS_MAJOR,
     minor: BASS_KEYS_MINOR
-   
   },
   guitar: {
     // currently uses fallback formula (diatonic)
@@ -1790,13 +1844,13 @@ function buildScale(root, type){
 
 // Main resolver used by the trainer:
 // returns the 7-note scale for (instrument, root, type).
-function getScaleNotes(){
+function getNoteScaleNotes(baseType){
+  // baseType is "major" or "minor" (natural minor)
   const instrument = $("instrument").value;
-  const type = $("scaleType").value; // "major" | "minor"
   const root = normalizeNoteName($("scaleRoot").value);
 
   const inst = INSTRUMENT_KEYMAP[instrument];
-  const mapped = inst && inst[type];
+  const mapped = inst && inst[baseType];
   if(Array.isArray(mapped) && mapped.length){
     const hit = mapped.find(k => normalizeNoteName(k.name) === root);
     if(hit && Array.isArray(hit.scale) && hit.scale.length === 7){
@@ -1805,12 +1859,78 @@ function getScaleNotes(){
   }
 
   // not mapped -> fall back to diatonic formula
-  return buildScale(root, type).map(normalizeNoteName);
+  return buildScale(root, baseType).map(normalizeNoteName);
+}function getChordScaleNotes(baseType){
+  // baseType is "major" or "minor" (natural minor)
+  const instrument = $("instrument").value;
+  const root = normalizeNoteName($("scaleRoot").value);
+
+  // If the instrument has an explicit map, use it (and then respell to chord-friendly names).
+  const inst = INSTRUMENT_KEYMAP[instrument];
+  const mapped = inst && inst[baseType];
+  if(Array.isArray(mapped) && mapped.length){
+    const hit = mapped.find(k => normalizeNoteName(k.name) === root);
+    if(hit && Array.isArray(hit.scale) && hit.scale.length === 7){
+      // Convert any sharps to flats for chord labels (edit SHARP_TO_FLAT if you prefer sharps)
+      return hit.scale.map(n => {
+        const nn = normalizeNoteName(n);
+        return SHARP_TO_FLAT[nn] ? SHARP_TO_FLAT[nn] : nn;
+      });
+    }
+  }
+
+  // Not mapped -> use chord spelling fallback builder
+  return buildChordScale(root, baseType).map(normalizeNoteName);
+}
+
+// Build a 7-item chord list (triads) from a 7-note scale, using the standard quality patterns.
+// We output chord symbols like: C, Dm, Em, F, G, Am, Bdim
+function buildChordList(scaleNotes, qualityPattern){
+  const out = [];
+  for(let i=0;i<7;i++){
+    const root = scaleNotes[i];
+    const q = qualityPattern[i];
+    if(q === "maj") out.push(root);
+    else if(q === "min") out.push(root + "m");
+    else if(q === "dim") out.push(root + "dim");
+    else out.push(root); // safe fallback
+  }
+  return out;
+}
+
+// Main resolver used by the trainer:
+// returns the 7-item list for (instrument, root, scaleType).
+// This list is used everywhere (display, quiz pools, etc.)
+function getScaleNotes(){
+  const type = $("scaleType").value; // "major" | "minor" | "major_chords" | "minor_chords"
+
+  // 1) NOTE LISTS (existing)
+  if(type === "major" || type === "minor"){
+    return getNoteScaleNotes(type);
+  }
+
+  // 2) CHORD LISTS (new)
+  // Major key triad qualities: I maj, ii min, iii min, IV maj, V maj, vi min, vii° dim
+  if(type === "major_chords"){
+    const notes = getNoteScaleNotes("major");
+    const qualities = ["maj","min","min","maj","maj","min","dim"];
+    return buildChordList(notes, qualities);
+  }
+
+  // Natural minor key triad qualities: i min, ii° dim, III maj, iv min, v min, VI maj, VII maj
+  if(type === "minor_chords"){
+    const notes = getNoteScaleNotes("minor");
+    const qualities = ["min","dim","maj","min","min","maj","maj"];
+    return buildChordList(notes, qualities);
+  }
+
+  // fallback
+  return getNoteScaleNotes("major");
 }
 
 // Convert note -> midi number -> frequency (used for "Play note")
 function noteToMidi(note, octave=4){
-  const idx = CHROMATIC.indexOf(normalizeNoteName(note));
+  const idx = CHROMATIC_NOTES.indexOf(normalizeNoteName(note));
   if(idx < 0) return 60;
   return 60 + idx + (octave - 4) * 12;
 }
@@ -1843,12 +1963,49 @@ function playTone(freq, ms=450){
 
 // Speak toggle + helper
 let speakEnabled = true;
+// =====================================================================
+// SPEECH OUTPUT (Fix "capital C" / casing announcements)
+// ---------------------------------------------------------------------
+// Some browsers speak single-letter notes like "C" as "capital C".
+// We keep the UI display unchanged, but transform ONLY the spoken text.
+// Examples:
+//   "C#"   -> "c sharp"
+//   "Db"   -> "d flat"
+//   "Am"   -> "a minor"
+//   "Bdim" -> "b diminished"
+// =====================================================================
+
+function formatForSpeech(raw){
+  if(!raw) return "";
+
+  let t = String(raw).trim();
+
+  // Convert accidentals
+  t = t.replace(/#/g, " sharp");
+  // Flats: "Db" or "Bb" -> "D flat", "B flat"
+  t = t.replace(/([A-Ga-g])b\b/g, "$1 flat");
+
+  // Chord qualities
+  t = t.replace(/dim\b/gi, " diminished");
+  // "m" minor (avoid touching "maj" / "major")
+  t = t.replace(/(^|[^a-zA-Z])m\b/gi, "$1 minor");
+
+  // Clean up extra spaces
+  t = t.replace(/\s+/g, " ").trim();
+
+  // Lowercase helps avoid "capital" announcements on many voices
+  return t.toLowerCase();
+}
+
 function speakValue(text){
   if(!speakEnabled) return;
   if(!("speechSynthesis" in window)) return;
+
+  const spokenText = formatForSpeech(text);
+
   try{
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
+    const u = new SpeechSynthesisUtterance(spokenText);
     u.rate = 1.0;
     u.pitch = 1.0;
     speechSynthesis.speak(u);
@@ -1892,8 +2049,13 @@ function tCurrentDegree(){ return tDegreeIdx + 1; }
 function tCurrentNote(){ return tScaleNotes[tDegreeIdx]; }
 function tScaleName(){
   const root = $("scaleRoot").value;
-  const type = ($("scaleType").value === "minor") ? "Minor" : "Major";
-  return `${root} ${type}`;
+  const t = $("scaleType").value;
+
+  if(t === "major") return `${root} Major`;
+  if(t === "minor") return `${root} Natural Minor`;
+  if(t === "major_chords") return `${root} Major Chords`;
+  if(t === "minor_chords") return `${root} Minor Chords`;
+  return `${root} Major`;
 }
 function tDisplayText(){
   return ($("displayMode").value === "notes") ? tCurrentNote() : String(tCurrentDegree());
