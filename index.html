@@ -87,7 +87,9 @@
       color: var(--text);
     }
     .app{
-      min-height: 100dvh;
+      /* Mobile-first fallback */
+      min-height: 100vh;
+      min-height: 100svh;
       padding: calc(env(safe-area-inset-top) + 14px)
                calc(env(safe-area-inset-right) + 14px)
                calc(env(safe-area-inset-bottom) + 14px)
@@ -98,7 +100,8 @@
 
     /* Desktop layout (Training big left + Metronome/Score right) */
     @media (min-width: 900px) and (orientation: landscape){
-      .app{ grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr 1fr; }
+      .app{
+      /* Mobile-first fallback */ grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr 1fr; }
       .titleTile{ grid-column: 1 / -1; }
       .training{ grid-column: 1; grid-row: 2 / span 2; }
       .metronome{ grid-column: 2; grid-row: 2; }
@@ -156,6 +159,10 @@
 
     /* ===== title tile ===== */
     .titleTile{ position: sticky; top: 0; z-index: 10; }
+
+@media (max-width: 900px){
+  .titleTile{ position: relative; top: auto; z-index: 1; }
+}
     .headerContent{
       padding: 18px;
       display:flex;
@@ -2343,3 +2350,35 @@ updateMetronomeConfigUI(true);
 </script>
 </body>
 </html>
+
+
+@media (max-width: 900px){
+  .app{
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+  }
+  .training, .metronome, .score{
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}
+
+
+@media (max-width: 900px){
+  .tileBody{
+    overflow: visible;
+    padding-bottom: 24px;
+  }
+  .stickyAction{
+    position: sticky;
+    bottom: 0;
+    pointer-events: auto;
+  }
+}
+
+
+@media (max-width: 900px){
+  .tile{
+    box-shadow: 0 10px 22px var(--shadowSoft);
+  }
+}
