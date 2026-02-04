@@ -1,0 +1,2183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Pro Practicer</title>
+
+  <style>
+    /* =========================================================
+       UI THEME TOKENS (Edit colors here only)
+       ---------------------------------------------------------
+       HOW TO CHANGE THE LOOK:
+       - Yellow mode: :root variables
+       - Dark mode  : [data-theme="dark"] variables
+       - Tile radius: --radius
+       - Spacing     : --gap
+    ========================================================= */
+    :root{
+      --radius: 22px;
+      --gap: 14px;
+
+      /* Yellow theme */
+      --appBg: #FFD84D;
+      --cardBg: #FFFFFF;
+      --cardBg2:#FFFFFF;
+      --stroke: rgba(0,0,0,.10);
+      --stroke2: rgba(0,0,0,.14);
+
+      --text: rgba(0,0,0,.92);
+      --muted: rgba(0,0,0,.62);
+      --muted2: rgba(0,0,0,.52);
+
+      --shadowSoft: rgba(0,0,0,.12);
+
+      --accent: #000;
+      --accentSoft: rgba(0,0,0,.06);
+
+      --beat: rgba(0,0,0,.10);
+      --beatActive: rgba(0,0,0,.75);
+      --beat1: rgba(255,70,70,.55);
+      --beat1Border: rgba(255,70,70,.75);
+
+      --majorGreen: #0E7A5F;
+      --majorGreenDark: #0B5F49;
+      --majorGreenText: #FFFFFF;
+      --majorGreenMuted: rgba(255,255,255,.86);
+
+      --noteYellow: #FFD84D;
+      --noteYellowSoft: #FFE88A;
+
+      --btnMinH: 46px;
+    }
+
+    [data-theme="dark"]{
+      --appBg: #070A14;
+      --cardBg: rgba(255,255,255,.06);
+      --cardBg2: rgba(255,255,255,.04);
+      --stroke: rgba(255,255,255,.10);
+      --stroke2: rgba(255,255,255,.14);
+
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --muted2: rgba(255,255,255,.55);
+
+      --shadowSoft: rgba(0,0,0,.25);
+
+      --accent: #7c5cff;
+      --accentSoft: rgba(255,255,255,.10);
+
+      --beat: rgba(255,255,255,.12);
+      --beatActive: rgba(124,92,255,.45);
+      --beat1: rgba(255,60,60,.38);
+      --beat1Border: rgba(255,60,60,.70);
+
+      --majorGreen: rgba(255,255,255,.08);
+      --majorGreenDark: rgba(255,255,255,.06);
+      --majorGreenText: rgba(255,255,255,.92);
+      --majorGreenMuted: rgba(255,255,255,.72);
+    }
+
+    /* ============ base layout ============ */
+    *{ box-sizing: border-box; }
+    html, body{ height:100%; margin:0; }
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--appBg);
+      color: var(--text);
+    }
+    .app{
+      min-height: 100dvh;
+      padding: calc(env(safe-area-inset-top) + 14px)
+               calc(env(safe-area-inset-right) + 14px)
+               calc(env(safe-area-inset-bottom) + 14px)
+               calc(env(safe-area-inset-left) + 14px);
+      display: grid;
+      gap: var(--gap);
+    }
+
+    /* Desktop layout (Training big left + Metronome/Score right) */
+    @media (min-width: 900px) and (orientation: landscape){
+      .app{ grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr 1fr; }
+      .titleTile{ grid-column: 1 / -1; }
+      .training{ grid-column: 1; grid-row: 2 / span 2; }
+      .metronome{ grid-column: 2; grid-row: 2; }
+      .score{ grid-column: 2; grid-row: 3; }
+    }
+
+    .tile{
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
+      box-shadow: 0 18px 40px var(--shadowSoft);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .tile.major{
+      background: linear-gradient(180deg, var(--majorGreen), var(--majorGreenDark));
+      border: 1px solid rgba(0,0,0,.12);
+      color: var(--majorGreenText);
+    }
+    [data-theme="dark"] .tile.major{
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    .tileHeader{
+      padding: 14px 16px 12px;
+      display:flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      border-bottom: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,0));
+    }
+    .tile.major .tileHeader{
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0));
+      border-bottom: 1px solid rgba(255,255,255,.16);
+    }
+
+    .tileTitle{ margin:0; font-size: 14px; letter-spacing: .2px; }
+    .tileSub{ margin: 3px 0 0; font-size: 12px; color: var(--muted); }
+    .tile.major .tileSub{ color: var(--majorGreenMuted); }
+
+    .tileBody{
+      padding: 14px 16px 0;
+      display: grid;
+      gap: 10px;
+      height: 100%;
+      overflow: auto;
+      padding-bottom: 128px;
+      position: relative;
+    }
+
+    /* ===== title tile ===== */
+    .titleTile{ position: sticky; top: 0; z-index: 10; }
+    .headerContent{
+      padding: 18px;
+      display:flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .headerLeft{ min-width: 240px; display:flex; flex-direction: column; gap: 6px; }
+    .appTitle{ margin:0; font-size: clamp(22px, 3.8vw, 34px); font-weight: 950; line-height: 1.05; }
+    .appSubtitle{ margin:0; font-size: 13px; font-weight: 750; color: var(--muted); }
+    .appContact{ display:flex; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .sep{ opacity:.65; }
+
+    .topControls{ display:flex; gap: 10px; align-items:center; flex-wrap: wrap; justify-content: flex-end; }
+
+    /* ===== controls ===== */
+    .selectBtn{
+      display:flex; align-items:center; gap: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--stroke2);
+      background: var(--accentSoft);
+      color: var(--text);
+      min-height: var(--btnMinH);
+      white-space: nowrap;
+    }
+    .tile.major .selectBtn{
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.20);
+      color: #fff;
+    }
+    .selectBtn label{ font-size: 12px; color: var(--muted); font-weight: 800; }
+    .tile.major .selectBtn label{ color: rgba(255,255,255,.86); }
+
+    select{
+      background: transparent;
+      color: inherit;
+      border: none;
+      outline: none;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      max-width: 240px;
+    }
+    option{ color: #0b0d14; }
+
+    .iconBtn{
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight: 950;
+      min-height: 46px;
+      min-width: 52px;
+      user-select:none;
+    }
+    .tile.major .iconBtn{
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.22);
+      color:#fff;
+    }
+
+    .mBtn{
+      border: 1px solid var(--stroke2);
+      background: var(--accentSoft);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight: 950;
+      min-height:46px;
+    }
+    .mBtn.primary{
+      border-color: rgba(0,0,0,.25);
+      background: var(--accent);
+      color: #fff;
+    }
+    .tile.major .mBtn.primary{
+      background:#000;
+      border-color: rgba(0,0,0,.30);
+      color:#fff;
+    }
+
+    .mToggle{
+      min-height: 38px;
+      padding: 8px 12px;
+      font-size: 12px;
+      border-radius: 12px;
+      font-weight: 900;
+      border:1px solid var(--stroke2);
+      background: var(--accentSoft);
+      cursor:pointer;
+    }
+    .tile.major .mToggle{
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.22);
+      color:#fff;
+    }
+    .mToggle.on{ background: rgba(0,0,0,.10); border-color: rgba(0,0,0,.22); }
+    .tile.major .mToggle.on{ background: rgba(0,0,0,.22); border-color: rgba(255,255,255,.18); }
+
+    /* ===== big training display ===== */
+    .bigDisplay{
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.55));
+      border-radius: 18px;
+      display:grid;
+      place-items: center;
+      min-height: 280px;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+      cursor: pointer;
+    }
+    .tile.major .bigDisplay{
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.20);
+    }
+
+    .scaleBadge{
+      position: absolute; top: 10px; right: 10px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.85);
+      color: rgba(0,0,0,.78);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .tile.major .scaleBadge{
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.82);
+    }
+
+    .bigNote{
+      font-size: clamp(78px, 9vw, 150px);
+      font-weight: 950;
+      letter-spacing: 1px;
+      line-height: 1;
+      padding: 10px 14px;
+      transform: translateY(-8px);
+      color: var(--noteYellow);
+    }
+    .tile.major .bigNote{ color: var(--noteYellowSoft); }
+
+    .beatInside{
+      position:absolute; left:0; right:0; bottom: 14px;
+      display:flex; justify-content:center; gap:12px; flex-wrap: wrap;
+      pointer-events:none;
+    }
+    .beatDot{
+      width: 14px; height: 14px; border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.22);
+      background: var(--beat);
+      box-shadow: 0 10px 22px var(--shadowSoft);
+      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+    .beatDot.active{ background: var(--beatActive); transform: translateY(-2px) scale(1.10); }
+    .beatDot.accent.active{ background: var(--beat1); border-color: var(--beat1Border); }
+
+    /* ===== quiz ===== */
+    .quizBox{
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+      border-radius: 18px;
+      padding: 12px;
+      display:none;
+      gap: 10px;
+    }
+    [data-theme="yellow"] .quizBox{
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(0,0,0,.06);
+    }
+    .quizTitle{
+      display:flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .answers{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+    }
+    @media (max-width: 520px){
+      .answers{ grid-template-columns: 1fr; }
+    }
+    .answerBtn{
+      min-height: 48px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.20);
+      background: rgba(255,255,255,.10);
+      color: #fff;
+      font-weight: 950;
+      cursor: pointer;
+    }
+    [data-theme="yellow"] .answerBtn{
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.65);
+      color: rgba(0,0,0,.86);
+    }
+    .answerBtn.correct{ outline: 3px solid rgba(0,255,170,.55); }
+    .answerBtn.wrong{ outline: 3px solid rgba(255,60,60,.55); }
+
+    .controlPanel{
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
+      border-radius: 18px;
+      padding: 12px;
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .tile.major .controlPanel{
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.20);
+    }
+    .leftGroup{ display:flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+    .stickyAction{
+      position: absolute; left: 0; right: 0; bottom: 0;
+      padding: 14px 16px calc(env(safe-area-inset-bottom) + 14px);
+      background: linear-gradient(0deg, rgba(255,255,255,.70), rgba(255,255,255,0));
+      display:flex; justify-content: center;
+      pointer-events: none;
+    }
+    .tile.major .stickyAction{
+      background: linear-gradient(0deg, rgba(0,0,0,.35), rgba(0,0,0,0));
+    }
+    .bigToggle{
+      pointer-events: auto;
+      width: min(560px, 100%);
+      min-height: 62px;
+      border-radius: 18px;
+      border: 1px solid rgba(0,0,0,.25);
+      background: #000;
+      color: #fff;
+      font-weight: 980;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .bigToggle.running{ background: rgba(255,90,90,.85); border-color: rgba(255,90,90,.40); }
+
+    /* ===== metronome tile ===== */
+    .chip{
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.85);
+      color: rgba(0,0,0,.78);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .tile.major .chip{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.88);
+    }
+
+    .metroConfigGrid{ display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+    @media (max-width: 520px){ .metroConfigGrid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
+    .cfgPill{
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
+      border-radius: 16px;
+      padding: 10px 10px;
+      min-height: 54px;
+      display: grid;
+      gap: 3px;
+      align-content: center;
+    }
+    .tile.major .cfgPill{
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.20);
+      color:#fff;
+    }
+    .cfgPill .k{ font-size: 11px; color: var(--muted2); font-weight: 900; text-transform: uppercase; }
+    .tile.major .cfgPill .k{ color: rgba(255,255,255,.70); }
+    .cfgPill .v{ font-size: 14px; font-weight: 950; color: var(--noteYellow); }
+    .tile.major .cfgPill .v{ color: var(--noteYellowSoft); }
+
+    .settingsPopover{
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.22);
+      border-radius: 18px;
+      padding: 12px;
+      display:none;
+      gap: 12px;
+    }
+    [data-theme="yellow"] .settingsPopover{
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(0,0,0,.06);
+    }
+    .grid2{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+    }
+    @media (max-width: 520px){ .grid2{ grid-template-columns: 1fr; } }
+
+    .field{
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      border-radius: 16px;
+      padding: 10px;
+      display:grid;
+      gap: 6px;
+    }
+    [data-theme="yellow"] .field{
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.65);
+    }
+    .field label{ font-size: 12px; font-weight: 900; color: rgba(255,255,255,.78); }
+    [data-theme="yellow"] .field label{ color: rgba(0,0,0,.66); }
+    .field input{
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+      color: #fff;
+      padding: 10px;
+      font-weight: 900;
+      outline: none;
+    }
+    [data-theme="yellow"] .field input{
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.85);
+      color: rgba(0,0,0,.85);
+    }
+
+    .metroBtns{ display:flex; gap: 10px; flex-wrap: wrap; justify-content:flex-start; }
+    .metroBpmCard{
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
+      border-radius: 18px;
+      padding: 12px;
+      display:grid;
+      gap: 10px;
+    }
+    .tile.major .metroBpmCard{
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.20);
+      color:#fff;
+    }
+
+    .bpmRow{ display:grid; grid-template-columns: 1fr auto; gap: 10px; align-items:center; }
+    .bpmLeft{ display:flex; align-items: baseline; gap: 10px; min-width: 0; }
+    .bpmBig{ font-size: 44px; font-weight: 950; line-height: 1; cursor: pointer; user-select: none; color: var(--noteYellow); }
+    .tile.major .bpmBig{ color: var(--noteYellowSoft); }
+    .bpmUnit{ color: var(--muted); font-size: 12px; font-weight: 900; }
+    .tile.major .bpmUnit{ color: rgba(255,255,255,.68); }
+
+    .bpmEdit{
+      display:none;
+      width: 98px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke2);
+      background: rgba(0,0,0,.10);
+      color: inherit;
+      padding: 10px 10px;
+      font-weight: 900;
+      font-size: 18px;
+      outline: none;
+      text-align: center;
+    }
+
+    .pmBtns{ display:flex; gap:10px; }
+    .beatRow{ display:flex; justify-content:center; gap:12px; flex-wrap: wrap; padding-bottom: 2px; }
+
+    .metroControls{
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
+      border-radius: 18px;
+      padding: 12px;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .tile.major .metroControls{
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.20);
+      color:#fff;
+    }
+
+    .mStartStopBig{
+      min-height: 54px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,.25);
+      background: #000;
+      color: #fff;
+      font-weight: 980;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .mStartStopBig.running{ background: rgba(255,90,90,.85); }
+
+    .volWrap{ display:flex; align-items:center; gap: 10px; flex: 1 1 260px; justify-content: flex-end; min-width: 220px; }
+    .volWrap span{ font-size: 12px; color: var(--muted); font-weight: 900; min-width: 60px; }
+    .tile.major .volWrap span{ color: rgba(255,255,255,.68); }
+    input[type="range"]{ width: 100%; }
+
+    /* ===== score ===== */
+    .statsGrid{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    @media (max-width: 520px){ .statsGrid{ grid-template-columns: 1fr; } }
+    .statCard{
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
+      border-radius: 18px;
+      padding: 14px;
+      min-height: 92px;
+      display: grid;
+      gap: 8px;
+    }
+    .tile.major .statCard{
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.20);
+      color:#fff;
+    }
+    .statCard .k{ font-size: 11px; color: var(--muted2); font-weight: 900; text-transform: uppercase; }
+    .tile.major .statCard .k{ color: rgba(255,255,255,.70); }
+    .statCard .v{ font-size: 24px; font-weight: 980; color: var(--noteYellow); }
+    .tile.major .statCard .v{ color: var(--noteYellowSoft); }
+    .statCard .s{ font-size: 12px; color: var(--muted); }
+    .tile.major .statCard .s{ color: rgba(255,255,255,.68); }
+
+    .shareBox{
+      border: 1px solid var(--stroke2);
+      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
+      border-radius: 18px;
+      padding: 12px;
+      display:none;
+      gap: 10px;
+    }
+    .shareText{
+      border: 1px dashed var(--stroke2);
+      border-radius: 16px;
+      padding: 12px;
+      font-size: 12px;
+      white-space: pre-wrap;
+      line-height: 1.35;
+    }
+    .shareBtns{ display:flex; justify-content:flex-end; gap:10px; flex-wrap: wrap; }
+
+    .centerPlaceholder{ text-align:center; color: var(--muted); padding: 10px 18px 18px; }
+    .tile.major .centerPlaceholder{ color: rgba(255,255,255,.80); }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+
+    <!-- =========================================================
+         TITLE TILE
+         - Edit "Your Name" and "your@email.com"
+         - Theme toggle button is on the right
+    ========================================================== -->
+    <section class="tile titleTile" id="titleTile">
+      <div class="headerContent">
+        <div class="headerLeft">
+          <h1 class="appTitle">PRO PRACTICER</h1>
+          <p class="appSubtitle">Practice Makes Perfect</p>
+          <div class="appContact">
+            <span class="contactName">Jijo Antony</span>
+            <span class="sep">•</span>
+            <span class="contactInfo"></span>
+            <span class="sep">•</span>
+            <span class="contactInfo">© <span id="yearNow"></span></span>
+          </div>
+        </div>
+
+        <div class="headerRight">
+          <button class="iconBtn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">☀️</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         TILE 1: MUSIC TRAINING
+         - Big display shows current note or Nashville number
+         - Freestyle mode: clicking big display advances
+         - Quiz mode: shows answer buttons + streak tracking
+    ========================================================== -->
+    <section class="tile major training" id="trainingTile">
+      <header class="tileHeader">
+        <div>
+          <h2 class="tileTitle"> TRAINER</h2>
+        </div>
+
+        <div class="topControls">
+          <div class="selectBtn">
+            <label for="instrument">INSTRUMENT</label>
+            <select id="instrument">
+              <option value="bass">BASS GUITAR</option>
+              <option value="guitar">GUITAR</option>
+              <option value="piano">PIANO</option>
+            </select>
+          </div>
+
+          <div class="selectBtn">
+            <label for="scaleRoot">SCALE</label>
+            <select id="scaleRoot" title="Scale root">
+              <option>C</option><option>C#</option><option>D</option><option>D#</option><option>E</option>
+              <option>F</option><option>F#</option><option>G</option><option>G#</option><option>A</option>
+              <option>A#</option><option>B</option>
+            </select>
+            <select id="scaleType" title="Scale type">
+              <option value="major">MAJOR</option>
+              <option value="minor">NATURAL MINOR</option>
+            </select>
+          </div>
+
+          <div class="selectBtn">
+            <label for="displayMode">DISPLAY</label>
+            <select id="displayMode">
+              <option value="notes">NOTES</option>
+              <option value="nashville">NASHVILLE #</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <div class="tileBody">
+        <!-- Big display: main training UI -->
+        <div class="bigDisplay" id="bigDisplay" title="Freestyle: tap to advance">
+          <div class="scaleBadge" id="scaleBadge">C MAJOR</div>
+          <div class="bigNote" id="bigNote">C</div>
+          <div class="beatInside" id="trainingBeats" aria-label="training beat indicator inside"></div>
+        </div>
+
+        <!-- QUIZ BOX (shown only when Practice = Quiz) -->
+        <div class="quizBox" id="quizBox">
+          <div class="quizTitle">
+            <div>
+              <strong>Choose the correct answer</strong><br/>
+              <span id="quizRule">Rule: Notes → pick Nashville number</span>
+            </div>
+            <button class="answerBtn" id="nextBtn" type="button" style="font-size:14px; padding:10px 12px;">Next</button>
+          </div>
+          <div class="answers" id="answers"></div>
+        </div>
+
+        <div class="controlPanel">
+          <div class="leftGroup">
+
+            <!-- ORDER MODE:
+                 - random: random degrees 1..7
+                 - ascending: 1..7 loop
+                 - asc_desc: 1..7 then 7..1 then repeat
+                 - freestyle: user click advances, metronome does NOT auto-advance
+            -->
+            <div class="selectBtn">
+              <label for="orderMode">ORDER</label>
+              <select id="orderMode">
+                <option value="random">RANDOM</option>
+                <option value="ascending">Ascending</option>
+                <option value="asc_desc">Ascending & Descending</option>
+                <option value="freestyle">Freestyle</option>
+              </select>
+            </div>
+
+            <!-- PRACTICE TYPE:
+                 - speak: uses speechSynthesis to say note/number
+                 - play : plays a sine tone using WebAudio
+                 - quiz : shows answer UI; metronome stops automatically
+            -->
+            <div class="selectBtn">
+              <label for="practiceType">PRACTICE</label>
+              <select id="practiceType">
+                <option value="speak">SPEAK</option>
+                <option value="play">PLAY NOTE</option>
+                <option value="quiz">WITHOUT INSTRUMENT(QUIZ)</option>
+              </select>
+            </div>
+
+            <!-- SWITCHING RULE:
+                 Controls when the target changes based on beat
+            -->
+            <div class="selectBtn">
+              <label for="beatSwitch">SWITCH CHORD</label>
+              <select id="beatSwitch">
+                <option value="every">IN EVERY BEAT</option>
+                <option value="first">ONLY AT THE FIRST BEAT</option>
+                <option value="every2">EVERY 2nd BEAT</option>
+                <option value="one_three"> 1 & 3</option>
+                <option value="one_four"> 1 & 4</option>
+              </select>
+            </div>
+
+            <!-- Toggles -->
+            <button class="mToggle on" id="metroToggle" type="button">METRONOME: ON</button>
+            <button class="mToggle on" id="speakToggle" type="button">SPEAK ACCISTANCE: ON</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main start/stop for training -->
+      <div class="stickyAction">
+        <button class="bigToggle" id="toggleBtn" type="button">START</button>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         TILE 2: METRONOME
+         - Uses WebAudio lookahead scheduler for stable timing
+         - Gear shows settings (ramp/range/subdivision/tap tempo)
+    ========================================================== -->
+    <section class="tile major metronome" id="metronomeTile">
+      <header class="tileHeader">
+        <div>
+          <h2 class="tileTitle">METRONOME</h2>
+        </div>
+        <div class="chip" id="tsChip">4/4</div>
+      </header>
+
+      <div class="tileBody" id="metronomeBody">
+
+        <!-- Current configuration preview -->
+        <div class="metroConfigGrid" aria-label="metronome current configuration">
+          <div class="cfgPill"><div class="k">Time Sig</div><div class="v" id="cfgTS">4/4</div></div>
+          <div class="cfgPill"><div class="k">Subdivision</div><div class="v" id="cfgSub">1</div></div>
+          <div class="cfgPill"><div class="k">Range</div><div class="v" id="cfgRange">30–260</div></div>
+          <div class="cfgPill"><div class="k">Ramp</div><div class="v" id="cfgRamp">Off</div></div>
+        </div>
+
+        <!-- Settings popover (open with ⚙️) -->
+        <div class="settingsPopover" id="metroSettings">
+          <div class="grid2">
+
+            <div class="selectBtn" style="width:100%; justify-content:space-between;">
+              <label for="timeSig">Time Sig</label>
+              <select id="timeSig">
+                <option value="2/4">2/4</option>
+                <option value="3/4">3/4</option>
+                <option value="4/4" selected>4/4</option>
+                <option value="5/4">5/4</option>
+                <option value="6/8">6/8</option>
+                <option value="7/8">7/8</option>
+                <option value="9/8">9/8</option>
+                <option value="12/8">12/8</option>
+              </select>
+            </div>
+
+            <div class="selectBtn" style="width:100%; justify-content:space-between;">
+              <label for="subdivision">Subdivision</label>
+              <select id="subdivision">
+                <option value="1" selected>Quarter (1)</option>
+                <option value="2">Eighth (2)</option>
+                <option value="3">Triplet (3)</option>
+                <option value="4">Sixteenth (4)</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="rangeMin">Range Min (BPM)</label>
+              <input id="rangeMin" type="number" value="30" min="1" max="399" />
+            </div>
+            <div class="field">
+              <label for="rangeMax">Range Max (BPM)</label>
+              <input id="rangeMax" type="number" value="260" min="2" max="400" />
+            </div>
+
+            <!-- Ramp controls:
+                 Ramp moves BPM from Start -> End by Step.
+                 Mode decides if step happens every X seconds or every X beats.
+            -->
+            <div class="field">
+              <label for="rampStart">Ramp Start BPM</label>
+              <input id="rampStart" type="number" value="70" min="1" max="400" />
+            </div>
+            <div class="field">
+              <label for="rampEnd">Ramp End BPM</label>
+              <input id="rampEnd" type="number" value="140" min="1" max="400" />
+            </div>
+
+            <div class="field">
+              <label for="rampStep">Ramp Step (BPM)</label>
+              <input id="rampStep" type="number" value="5" min="1" max="50" />
+            </div>
+
+            <div class="selectBtn" style="width:100%; justify-content:space-between;">
+              <label for="rampMode">Ramp Mode</label>
+              <select id="rampMode">
+                <option value="time" selected>Increase by Time</option>
+                <option value="beats">Increase by Beats</option>
+              </select>
+            </div>
+
+            <div class="field" id="rampTimeField">
+              <label for="rampTime">Step Interval (sec)</label>
+              <input id="rampTime" type="number" value="60" min="1" max="3600" />
+            </div>
+
+            <div class="field" id="rampBeatsField" style="display:none;">
+              <label for="rampBeats">Step Interval (beats)</label>
+              <input id="rampBeats" type="number" value="4" min="1" max="9999" />
+            </div>
+          </div>
+
+          <div class="metroBtns" style="justify-content:space-between;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="mBtn primary" id="rampArm" type="button">RAMP: OFF</button>
+              <button class="mBtn" id="rampReset" type="button">RESET RAMP</button>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="mBtn" id="mTap" type="button">TAP TEMPO</button>
+              <button class="mBtn" id="mAccent" type="button">Accent: ON</button>
+            </div>
+          </div>
+
+          <div class="metroBtns" style="justify-content:flex-end;">
+            <button class="mBtn" id="closeSettings" type="button">CLOSE</button>
+          </div>
+        </div>
+
+        <!-- BPM card -->
+        <div class="metroBpmCard" id="metroBpmCard">
+          <div class="bpmRow">
+            <div class="bpmLeft">
+              <div class="bpmBig" id="bpmBig" title="Tap to edit">100</div>
+              <div class="bpmUnit">BPM</div>
+              <input class="bpmEdit" id="bpmEdit" type="number" min="1" max="400" value="100" />
+            </div>
+
+            <div class="pmBtns">
+              <button class="iconBtn" id="bpmDown" type="button">−</button>
+              <button class="iconBtn" id="bpmUp" type="button">+</button>
+            </div>
+          </div>
+
+          <div class="beatRow" id="metroBeats" aria-label="metronome beats"></div>
+        </div>
+
+        <!-- Metronome controls row -->
+        <div class="metroControls">
+          <button class="mStartStopBig" id="mStartStop" type="button">START</button>
+
+          <div class="volWrap">
+            <span>Volume</span>
+            <input id="mVol" type="range" min="0" max="100" value="60" />
+          </div>
+
+          <button class="iconBtn" id="gearBtn" type="button" title="Settings">⚙️</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         TILE 3: SCORE
+         - Total practice time
+         - Best quiz session time
+         - Highest quiz score
+         - Top BPM (from metronome usage)
+         - Share/copy summary
+    ========================================================== -->
+    <section class="tile major score" id="scoreTile">
+      <header class="tileHeader">
+        <div>
+          <h2 class="tileTitle">Score &amp; Achievements</h2>
+          <p class="tileSub">Saved on this device</p>
+        </div>
+
+        <div class="topControls">
+          <button class="mBtn primary" id="shareBtn" type="button">SHARE</button>
+        </div>
+      </header>
+
+      <div class="tileBody">
+        <div class="statsGrid">
+          <div class="statCard">
+            <div class="k">Total practice time</div>
+            <div class="v" id="statTotalTime">0m</div>
+            <div class="s">Training tile</div>
+          </div>
+
+          <div class="statCard">
+            <div class="k">Best continuous quiz time</div>
+            <div class="v" id="statBestQuizTime">0m</div>
+            <div class="s">Quiz mode only</div>
+          </div>
+
+          <div class="statCard">
+            <div class="k">Highest quiz score</div>
+            <div class="v" id="statHighScore">0</div>
+            <div class="s">Best streak</div>
+          </div>
+
+          <div class="statCard">
+            <div class="k">Most practiced BPM</div>
+            <div class="v" id="statTopBpm">—</div>
+            <div class="s">From metronome usage</div>
+          </div>
+        </div>
+
+        <div class="shareBox" id="shareBox" aria-live="polite" style="display:none;">
+          <div class="shareText" id="shareText"></div>
+          <div class="shareBtns">
+            <button class="mBtn primary" id="copyShare" type="button">Copy</button>
+            <button class="mBtn" id="closeShare" type="button">Close</button>
+          </div>
+        </div>
+
+        <div class="centerPlaceholder">
+          Tip: Use Quiz mode for score, and keep the metronome running to build BPM stats.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+<script>
+/* =====================================================================
+   INSTRUMENT TRAINER (Documented)
+   =====================================================================
+
+   ✅ How this code is organized:
+
+   1) CONFIG QUICK EDIT
+      - change defaults, storage keys, BPM limits, etc.
+
+   2) Helpers (DOM, clamp, time formatting)
+
+   3) Theme
+      - persisted in localStorage
+
+   4) Stats
+      - persisted in localStorage (debounced saving)
+      - tracks: total practice time, best quiz time, high score, top BPM
+
+   5) Metronome (WebAudio scheduler)
+      - stable timing using "lookahead" scheduling
+      - supports: BPM, +/- , edit BPM, time sig, subdivision,
+                  mute click, accent, volume,
+                  ramp (time/beats), tap tempo, range min/max
+
+   6) Trainer
+      - scale generation
+      - order modes: random / ascending / asc_desc / freestyle
+      - practice modes: speak / play / quiz
+      - beatSwitch: when to change target
+
+   7) Quiz
+      - 4 answers, correct/wrong highlighting
+      - streak scoring
+      - quiz session time tracking
+
+   ---------------------------------------------------------------------
+   IMPORTANT NOTE ABOUT AUDIO (Mobile / iOS):
+   - AudioContext (metronome clicks and play-tone) is locked until user
+     interacts (button click). We ensure it in Start actions.
+   ===================================================================== */
+
+
+/* =====================================================================
+   1) CONFIG QUICK EDIT (edit these values safely)
+   ===================================================================== */
+
+// LocalStorage keys (change these if you want a fresh reset for users)
+const THEME_KEY = "instrument_trainer_theme_v2";
+const STATS_KEY = "instrument_trainer_stats_v2";
+
+// Default ramp settings (metronome starts ramp from here)
+const DEFAULT_RAMP = {
+  start: 100,
+  end: 140,
+  step: 2,
+  mode: "time",   // "time" or "beats"
+  timeSec: 2,
+  beats: 4
+};
+
+// BPM clamps (range inputs also enforce this, but this is safety)
+const BPM_MIN_HARD = 1;
+const BPM_MAX_HARD = 400;
+
+
+/* =====================================================================
+   2) HELPERS
+   ===================================================================== */
+
+document.getElementById("yearNow").textContent = new Date().getFullYear();
+
+// DOM shortcut (id only)
+const $ = (id) => document.getElementById(id);
+
+// clamp number into [a,b]
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+
+// high precision time (ms)
+const nowMs = () => performance.now();
+
+// pretty duration formatter
+function formatDuration(ms){
+  ms = Math.max(0, Math.floor(ms||0));
+  const s = Math.floor(ms/1000);
+  const h = Math.floor(s/3600);
+  const m = Math.floor((s%3600)/60);
+  const ss = s%60;
+  if(h>0) return `${h}h ${m}m`;
+  if(m>0) return `${m}m ${ss}s`;
+  return `${ss}s`;
+}
+
+
+/* =====================================================================
+   3) THEME (persisted)
+   ===================================================================== */
+
+function getPreferredTheme(){
+  // User saved theme wins
+  const saved = localStorage.getItem(THEME_KEY);
+  if(saved === "yellow" || saved === "dark") return saved;
+
+  // Otherwise use OS preference
+  return (matchMedia && matchMedia("(prefers-color-scheme: dark)").matches)
+    ? "dark"
+    : "yellow";
+}
+
+function setTheme(theme){
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem(THEME_KEY, theme);
+  $("themeToggle").textContent = (theme === "dark") ? "☾" : "☀️";
+}
+
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute("data-theme") || "yellow";
+  setTheme(cur === "dark" ? "yellow" : "dark");
+}
+
+// init theme
+setTheme(getPreferredTheme());
+$("themeToggle").addEventListener("click", toggleTheme);
+
+
+/* =====================================================================
+   4) STATS (persisted, debounced)
+   ===================================================================== */
+
+const STATS_DEFAULT = {
+  totalPracticeMs: 0,
+  bestQuizSessionMs: 0,
+  quizHighScore: 0,
+  bpmCounts: {} // {"120": 30, ...}
+};
+
+// load stats safely
+function loadStats(){
+  try{
+    const raw = localStorage.getItem(STATS_KEY);
+    if(!raw) return structuredClone(STATS_DEFAULT);
+    const obj = JSON.parse(raw);
+    return {
+      totalPracticeMs: Number(obj.totalPracticeMs)||0,
+      bestQuizSessionMs: Number(obj.bestQuizSessionMs)||0,
+      quizHighScore: Number(obj.quizHighScore)||0,
+      bpmCounts: (obj.bpmCounts && typeof obj.bpmCounts === "object") ? obj.bpmCounts : {}
+    };
+  }catch(e){
+    return structuredClone(STATS_DEFAULT);
+  }
+}
+
+const STATS = loadStats();
+
+// Debounced save = less localStorage writes = better performance
+let _saveTimer = null;
+function saveStats(){
+  if(_saveTimer) return;
+  _saveTimer = setTimeout(() => {
+    _saveTimer = null;
+    try{ localStorage.setItem(STATS_KEY, JSON.stringify(STATS)); }catch(e){}
+  }, 250);
+}
+
+// Find the most-used BPM from bpmCounts
+function computeTopBpm(){
+  const entries = Object.entries(STATS.bpmCounts);
+  if(!entries.length) return null;
+  entries.sort((a,b)=> (Number(b[1])||0) - (Number(a[1])||0));
+  const [bpm, count] = entries[0];
+  return count ? Number(bpm) : null;
+}
+
+// Paint score UI
+function updateScoreUI(){
+  $("statTotalTime").textContent = formatDuration(STATS.totalPracticeMs);
+  $("statBestQuizTime").textContent = formatDuration(STATS.bestQuizSessionMs);
+  $("statHighScore").textContent = String(STATS.quizHighScore);
+  const top = computeTopBpm();
+  $("statTopBpm").textContent = top ? (top + " BPM") : "—";
+}
+updateScoreUI();
+
+// Session tracking variables
+let practiceSessionStart = null;
+let quizSessionStart = null;
+let currentQuizScore = 0;
+
+// start practice timer
+function startPracticeSession(){
+  if(practiceSessionStart) return;
+  practiceSessionStart = nowMs();
+}
+
+// stop practice timer and add to total
+function stopPracticeSession(){
+  if(!practiceSessionStart) return;
+  const dur = nowMs() - practiceSessionStart;
+  practiceSessionStart = null;
+
+  STATS.totalPracticeMs += Math.max(0, dur);
+  saveStats();
+  updateScoreUI();
+}
+
+// start quiz time + reset streak
+function startQuizSession(){
+  if(quizSessionStart) return;
+  quizSessionStart = nowMs();
+  currentQuizScore = 0;
+}
+
+// stop quiz time + update best time and high score
+function stopQuizSession(){
+  if(!quizSessionStart) return;
+  const dur = nowMs() - quizSessionStart;
+  quizSessionStart = null;
+
+  if(dur > STATS.bestQuizSessionMs) STATS.bestQuizSessionMs = dur;
+  if(currentQuizScore > STATS.quizHighScore) STATS.quizHighScore = currentQuizScore;
+
+  saveStats();
+  updateScoreUI();
+}
+
+
+/* =====================================================================
+   Share Achievements (Web Share API + fallback)
+   ===================================================================== */
+function achievementsText(){
+  const topBpm = computeTopBpm();
+  return [
+    "🎵 Instrument Trainer – My Achievements",
+    `• Total practice time: ${formatDuration(STATS.totalPracticeMs)}`,
+    `• Best continuous quiz time: ${formatDuration(STATS.bestQuizSessionMs)}`,
+    `• Highest quiz score: ${STATS.quizHighScore}`,
+    `• Most practiced metronome BPM: ${topBpm ? (topBpm + " BPM") : "—"}`
+  ].join("\n");
+}
+
+async function shareAchievements(){
+  const text = achievementsText();
+
+  // If native share is available (mobile), use it
+  if(navigator.share){
+    try{ await navigator.share({ title: "My Achievements", text }); return; }catch(e){}
+  }
+
+  // Otherwise show the share box
+  $("shareText").textContent = text;
+  $("shareBox").style.display = "grid";
+}
+
+$("shareBtn").addEventListener("click", shareAchievements);
+$("closeShare").addEventListener("click", () => $("shareBox").style.display = "none");
+
+$("copyShare").addEventListener("click", async () => {
+  const text = achievementsText();
+  try{
+    await navigator.clipboard.writeText(text);
+    $("copyShare").textContent = "Copied!";
+    setTimeout(() => ($("copyShare").textContent = "Copy"), 900);
+  }catch(e){
+    $("shareText").textContent = text + "\n\n(Select and copy manually)";
+  }
+});
+
+
+/* =====================================================================
+   5) METRONOME (WebAudio Scheduler)
+   =====================================================================
+
+   WHY lookahead scheduling?
+   - setTimeout/setInterval can drift due to UI load, tab throttling, etc.
+   - WebAudio scheduling lets us schedule clicks slightly in advance for
+     stable timing.
+
+   HOW it works:
+   - schedulerLoop runs every ~25ms
+   - it schedules audio clicks up to scheduleAheadSec (~120ms) ahead
+   - "nextNoteTime" tracks when the next click should happen in the audio timeline
+*/
+
+// Metronome state (everything the metronome needs)
+const METRONOME = {
+  bpm: DEFAULT_RAMP.start,
+  running: false,
+  beatsPerBar: 4,
+  beat: 1,
+  subDiv: 1,
+  subTick: 0,
+
+  clickMuted: false,  // training tile toggle controls this
+  accentOn: true,
+  volume: 0.60,
+
+  rangeMin: 30,
+  rangeMax: 260,
+
+  // ramp settings
+  rampEnabled: false,
+  rampMode: DEFAULT_RAMP.mode, // "time" or "beats"
+  rampStartBpm: DEFAULT_RAMP.start,
+  rampEndBpm: DEFAULT_RAMP.end,
+  rampStep: DEFAULT_RAMP.step,
+  rampTimeSec: DEFAULT_RAMP.timeSec,
+  rampBeats: DEFAULT_RAMP.beats,
+
+  rampNextStepT: 0,        // used for time mode
+  rampBeatStepCounter: 0,  // used for beats mode
+
+  subscribers: []           // trainer listens here for beat events
+};
+
+// WebAudio context for metronome clicks
+let audioCtx = null;
+function ensureAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// Simple click generator (square wave + short envelope)
+function playClick(freq, gainLevel, ms){
+  const ctx = ensureAudio();
+  if(ctx.state === "suspended") ctx.resume();
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "square";
+  osc.frequency.value = freq;
+
+  const t = ctx.currentTime;
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, gainLevel), t + 0.005);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + ms/1000);
+
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + ms/1000 + 0.02);
+}
+
+// Scheduler settings (tune these if you want)
+const SCHED = {
+  lookaheadMs: 25,         // how often the scheduler runs
+  scheduleAheadSec: 0.12,  // how far ahead we schedule
+  timerId: null,
+  nextNoteTime: 0
+};
+
+// Apply global BPM clamps
+function clampBpm(v){
+  const x = Math.round(Number(v)||1);
+  const withinHard = clamp(x, BPM_MIN_HARD, BPM_MAX_HARD);
+  // also respect rangeMin/rangeMax (user range)
+  return clamp(withinHard, METRONOME.rangeMin, METRONOME.rangeMax);
+}
+
+// How long each metronome tick should be in seconds
+function secondsPerSubTick(){
+  const bpm = clampBpm(METRONOME.bpm);
+  const beatSec = 60 / bpm;
+  return beatSec / Math.max(1, METRONOME.subDiv);
+}
+
+/* Ramp logic
+   - If ramp is enabled, BPM moves from rampStartBpm -> rampEndBpm
+   - step size = rampStep
+   - mode = time (every rampTimeSec) OR beats (every rampBeats beats)
+*/
+function applyRampIfNeeded(){
+  if(!METRONOME.rampEnabled) return;
+
+  const start = clampBpm(METRONOME.rampStartBpm);
+  const end   = clampBpm(METRONOME.rampEndBpm);
+
+  const dir = (end >= start) ? 1 : -1; // ramp direction
+  const stepAbs = Math.max(1, Number(METRONOME.rampStep) || 1);
+  const step = stepAbs * dir;
+
+  // If we reached end, stop ramp automatically
+  const atEnd = (dir === 1) ? (METRONOME.bpm >= end) : (METRONOME.bpm <= end);
+  if(atEnd){
+    METRONOME.bpm = end;
+    METRONOME.rampEnabled = false;
+    return;
+  }
+
+  // TIME mode: step occurs when current time exceeds rampNextStepT
+  if(METRONOME.rampMode === "time"){
+    const now = nowMs();
+    if(now < METRONOME.rampNextStepT) return;
+
+    let next = clampBpm(METRONOME.bpm + step);
+    next = (dir === 1) ? Math.min(next, end) : Math.max(next, end);
+
+    METRONOME.bpm = next;
+    METRONOME.rampNextStepT = now + (Math.max(1, METRONOME.rampTimeSec) * 1000);
+    return;
+  }
+
+  // BEATS mode: step occurs after N completed beats
+  if(METRONOME.rampBeatStepCounter >= Math.max(1, METRONOME.rampBeats)){
+    let next = clampBpm(METRONOME.bpm + step);
+    next = (dir === 1) ? Math.min(next, end) : Math.max(next, end);
+
+    METRONOME.bpm = next;
+    METRONOME.rampBeatStepCounter = 0;
+  }
+}
+
+// Subscribers get a payload each tick
+function notifySubscribers(){
+  const payload = {
+    bpm: METRONOME.bpm,
+    running: METRONOME.running,
+    beatsPerBar: METRONOME.beatsPerBar,
+    beat: METRONOME.beat,
+    subDiv: METRONOME.subDiv,
+    subTick: METRONOME.subTick
+  };
+  for(const fn of METRONOME.subscribers) fn(payload);
+}
+
+// Schedules one tick at an audio timeline time
+function scheduleOneTick(){
+  // Sound generation (if not muted)
+  if(!METRONOME.clickMuted){
+    const vol = METRONOME.volume;
+    const isDownBeat = (METRONOME.beat === 1 && METRONOME.subTick === 0);
+    const isBeatTick = (METRONOME.subTick === 0);
+
+    // Loudness + frequency shaping
+    const baseGain = isBeatTick ? (0.12 + vol * 0.28) : (0.06 + vol * 0.16);
+    const gain = (isDownBeat && METRONOME.accentOn) ? (0.18 + vol * 0.35) : baseGain;
+
+    const freq = isDownBeat ? 1200 : (isBeatTick ? 900 : 750);
+    playClick(freq, gain, isBeatTick ? 55 : 35);
+  }
+
+  // Record BPM usage for stats on beat-start
+  if(METRONOME.subTick === 0){
+    const k = String(clampBpm(METRONOME.bpm));
+    STATS.bpmCounts[k] = (Number(STATS.bpmCounts[k])||0) + 1;
+  }
+
+  // Notify listeners (trainer uses this)
+  notifySubscribers();
+
+  // Advance subdivision and beat counters
+  METRONOME.subTick = (METRONOME.subTick + 1) % METRONOME.subDiv;
+
+  if(METRONOME.subTick === 0){
+    METRONOME.beat = (METRONOME.beat % METRONOME.beatsPerBar) + 1;
+
+    // If ramp is beats mode, count beats
+    if(METRONOME.rampEnabled && METRONOME.rampMode === "beats"){
+      METRONOME.rampBeatStepCounter += 1;
+    }
+  }
+
+  // Apply ramp changes after movement
+  applyRampIfNeeded();
+}
+
+// UI refresh throttling (avoid updating DOM on every tick)
+let _lastUiPaint = 0;
+function updateMetronomeConfigUI(force=false){
+  const t = nowMs();
+  if(!force && (t - _lastUiPaint) < 80) return; // ~12 fps UI updates
+  _lastUiPaint = t;
+
+  $("tsChip").textContent = `${METRONOME.beatsPerBar}/4`;
+  $("cfgTS").textContent = `${METRONOME.beatsPerBar}/4`;
+  $("cfgSub").textContent = String(METRONOME.subDiv);
+  $("cfgRange").textContent = `${METRONOME.rangeMin}–${METRONOME.rangeMax}`;
+  $("cfgRamp").textContent = METRONOME.rampEnabled ? "On" : "Off";
+
+  $("bpmBig").textContent = String(clampBpm(METRONOME.bpm));
+  $("bpmEdit").value = String(clampBpm(METRONOME.bpm));
+
+  $("mStartStop").textContent = METRONOME.running ? "Stop" : "Start";
+  $("mStartStop").classList.toggle("running", METRONOME.running);
+
+  $("rampArm").textContent = `Ramp: ${METRONOME.rampEnabled ? "On" : "Off"}`;
+  $("mAccent").textContent = `Accent: ${METRONOME.accentOn ? "On" : "Off"}`;
+
+  // Beat indicator UI
+  if(METRONOME.running){
+    setActiveBeat($("metroBeats"), METRONOME.beat);
+    if($("practiceType").value !== "quiz") setActiveBeat($("trainingBeats"), METRONOME.beat);
+    else setActiveBeat($("trainingBeats"), 1);
+  }else{
+    setActiveBeat($("metroBeats"), 1);
+    setActiveBeat($("trainingBeats"), 1);
+  }
+
+  saveStats();
+  updateScoreUI();
+}
+
+// Main scheduler loop
+function schedulerLoop(){
+  if(!METRONOME.running) return;
+
+  const ctx = ensureAudio();
+  const currentTime = ctx.currentTime;
+
+  // Schedule ticks ahead
+  while(SCHED.nextNoteTime < currentTime + SCHED.scheduleAheadSec){
+    scheduleOneTick();
+    SCHED.nextNoteTime += secondsPerSubTick();
+  }
+
+  updateMetronomeConfigUI(false);
+  SCHED.timerId = setTimeout(schedulerLoop, SCHED.lookaheadMs);
+}
+
+// Start metronome
+function startMetronome(){
+  ensureAudio();
+  if(audioCtx.state === "suspended") audioCtx.resume();
+
+  if(SCHED.timerId) clearTimeout(SCHED.timerId);
+
+  METRONOME.running = true;
+  METRONOME.beat = 1;
+  METRONOME.subTick = 0;
+
+  // initialize ramp counters when starting
+  if(METRONOME.rampEnabled && METRONOME.rampMode === "time"){
+    METRONOME.rampNextStepT = nowMs() + (Math.max(1, METRONOME.rampTimeSec) * 1000);
+  }
+  METRONOME.rampBeatStepCounter = 0;
+
+  SCHED.nextNoteTime = audioCtx.currentTime + 0.02;
+  schedulerLoop();
+  updateMetronomeConfigUI(true);
+}
+
+// Stop metronome
+function stopMetronome(){
+  METRONOME.running = false;
+  if(SCHED.timerId){ clearTimeout(SCHED.timerId); SCHED.timerId = null; }
+  METRONOME.beat = 1;
+  METRONOME.subTick = 0;
+  notifySubscribers();
+  updateMetronomeConfigUI(true);
+}
+
+// Tap tempo (average of last taps)
+let tapTimes = [];
+function tapTempo(){
+  const t = nowMs();
+  tapTimes.push(t);
+  tapTimes = tapTimes.slice(-6);
+
+  if(tapTimes.length < 2) return;
+
+  const intervals = [];
+  for(let i=1;i<tapTimes.length;i++){
+    intervals.push(tapTimes[i] - tapTimes[i-1]);
+  }
+
+  const avgMs = intervals.reduce((a,b)=>a+b,0) / intervals.length;
+  METRONOME.bpm = clampBpm(60000 / avgMs);
+  updateMetronomeConfigUI(true);
+}
+
+
+/* =====================================================================
+   Beat dots rendering (used in training + metronome)
+   ===================================================================== */
+function renderBeatDots(container, beatsPerBar){
+  container.innerHTML = "";
+  const safe = clamp(beatsPerBar, 1, 12);
+  for(let i=1;i<=safe;i++){
+    const d=document.createElement("div");
+    d.className = "beatDot" + (i===1 ? " accent" : "");
+    d.dataset.beat = String(i);
+    container.appendChild(d);
+  }
+}
+
+function setActiveBeat(container, beat){
+  const dots=[...container.querySelectorAll(".beatDot")];
+  for(const d of dots) d.classList.remove("active");
+  const active = dots.find(d => Number(d.dataset.beat) === beat);
+  if(active) active.classList.add("active");
+}
+
+function rebuildBeatDots(){
+  renderBeatDots($("trainingBeats"), METRONOME.beatsPerBar);
+  renderBeatDots($("metroBeats"), METRONOME.beatsPerBar);
+}
+rebuildBeatDots();
+
+
+/* =====================================================================
+   Metronome UI wiring (buttons/inputs)
+   ===================================================================== */
+
+// Start/Stop metronome tile button
+$("mStartStop").addEventListener("click", () => {
+  METRONOME.running ? stopMetronome() : startMetronome();
+});
+
+// Volume slider
+$("mVol").addEventListener("input", (e) => {
+  METRONOME.volume = clamp(Number(e.target.value)||0, 0, 100)/100;
+});
+
+// BPM +/- buttons
+$("bpmUp").addEventListener("click", () => { METRONOME.bpm = clampBpm(METRONOME.bpm + 1); updateMetronomeConfigUI(true); });
+$("bpmDown").addEventListener("click", () => { METRONOME.bpm = clampBpm(METRONOME.bpm - 1); updateMetronomeConfigUI(true); });
+
+// Click-to-edit BPM (swap display text into input)
+$("bpmBig").addEventListener("click", () => {
+  $("bpmBig").style.display = "none";
+  $("bpmEdit").style.display = "inline-block";
+  $("bpmEdit").focus();
+  $("bpmEdit").select();
+});
+$("bpmEdit").addEventListener("blur", () => {
+  METRONOME.bpm = clampBpm($("bpmEdit").value);
+  $("bpmEdit").style.display = "none";
+  $("bpmBig").style.display = "block";
+  updateMetronomeConfigUI(true);
+});
+$("bpmEdit").addEventListener("keydown", (e) => {
+  if(e.key === "Enter") $("bpmEdit").blur();
+  if(e.key === "Escape"){
+    $("bpmEdit").value = String(clampBpm(METRONOME.bpm));
+    $("bpmEdit").blur();
+  }
+});
+
+// Gear settings popover open/close
+$("gearBtn").addEventListener("click", () => {
+  const open = $("metroSettings").style.display === "grid";
+  $("metroSettings").style.display = open ? "none" : "grid";
+});
+$("closeSettings").addEventListener("click", () => $("metroSettings").style.display = "none");
+
+// Time signature changes beatsPerBar (we only use top number for beat count)
+$("timeSig").addEventListener("change", (e) => {
+  const [top] = String(e.target.value).split("/");
+  METRONOME.beatsPerBar = clamp(Number(top)||4, 1, 12);
+  METRONOME.beat = 1; METRONOME.subTick = 0;
+  rebuildBeatDots();
+  updateMetronomeConfigUI(true);
+});
+
+// Subdivision (1..4) changes ticks per beat
+$("subdivision").addEventListener("change", (e) => {
+  METRONOME.subDiv = clamp(Number(e.target.value)||1, 1, 4);
+  METRONOME.subTick = 0;
+  updateMetronomeConfigUI(true);
+});
+
+// BPM range min/max (also clamps current bpm)
+function syncRange(){
+  METRONOME.rangeMin = clamp(Number($("rangeMin").value)||30, BPM_MIN_HARD, BPM_MAX_HARD-1);
+  METRONOME.rangeMax = clamp(Number($("rangeMax").value)||260, METRONOME.rangeMin+1, BPM_MAX_HARD);
+  METRONOME.bpm = clampBpm(METRONOME.bpm);
+  updateMetronomeConfigUI(true);
+}
+$("rangeMin").addEventListener("change", syncRange);
+$("rangeMax").addEventListener("change", syncRange);
+
+// Ramp input sync + mode field swap
+function syncRampInputsToState(){
+  METRONOME.rampStartBpm = clampBpm($("rampStart").value);
+  METRONOME.rampEndBpm   = clampBpm($("rampEnd").value);
+  METRONOME.rampStep     = Math.max(1, Number($("rampStep").value)||1);
+
+  METRONOME.rampMode     = $("rampMode").value === "beats" ? "beats" : "time";
+  METRONOME.rampTimeSec  = Math.max(1, Number($("rampTime").value)||2);
+  METRONOME.rampBeats    = Math.max(1, Number($("rampBeats").value)||4);
+
+  // Show relevant interval field
+  if(METRONOME.rampMode === "time"){
+    $("rampTimeField").style.display = "grid";
+    $("rampBeatsField").style.display = "none";
+  }else{
+    $("rampTimeField").style.display = "none";
+    $("rampBeatsField").style.display = "grid";
+  }
+
+  updateMetronomeConfigUI(true);
+}
+["rampStart","rampEnd","rampStep","rampMode","rampTime","rampBeats"].forEach(id => {
+  $(id).addEventListener("change", syncRampInputsToState);
+});
+syncRampInputsToState();
+
+// Ramp on/off (when ON: set bpm to start for predictable ramp behavior)
+$("rampArm").addEventListener("click", () => {
+  syncRampInputsToState();
+  METRONOME.rampEnabled = !METRONOME.rampEnabled;
+
+  if(METRONOME.rampEnabled){
+    METRONOME.bpm = clampBpm(METRONOME.rampStartBpm);
+    METRONOME.rampBeatStepCounter = 0;
+    if(METRONOME.rampMode === "time"){
+      METRONOME.rampNextStepT = nowMs() + (Math.max(1, METRONOME.rampTimeSec) * 1000);
+    }
+  }
+  updateMetronomeConfigUI(true);
+});
+
+// Ramp reset sets bpm back to start (keeps ramp state)
+$("rampReset").addEventListener("click", () => {
+  syncRampInputsToState();
+  METRONOME.bpm = clampBpm(METRONOME.rampStartBpm);
+  METRONOME.rampBeatStepCounter = 0;
+  if(METRONOME.rampMode === "time"){
+    METRONOME.rampNextStepT = nowMs() + (Math.max(1, METRONOME.rampTimeSec) * 1000);
+  }
+  updateMetronomeConfigUI(true);
+});
+
+// Tap tempo + accent toggle
+$("mTap").addEventListener("click", tapTempo);
+$("mAccent").addEventListener("click", () => {
+  METRONOME.accentOn = !METRONOME.accentOn;
+  updateMetronomeConfigUI(true);
+});
+
+
+/* =====================================================================
+   6) TRAINER (Scale + display logic)
+   ===================================================================== */
+
+// =====================================================================
+// NOTE/NUMBER FORMULA (Instrument-aware)
+// ---------------------------------------------------------------------
+// Your app has 2 concepts:
+//
+// 1) "NOTES"  -> the actual note name shown on the big tile
+// 2) "NUMBER" -> the Nashville degree (1..7) shown on the big tile
+//
+// Previously, ALL instruments used the same diatonic math (CHROMATIC + STEPS).
+// Now we support instrument-specific key maps.
+// - Bass Guitar uses your explicit 7-note key lists for MAJOR.
+// - For any instrument/key/type not defined in a map, we safely fall back
+//   to the original diatonic builder (CHROMATIC + MAJOR/MINOR steps).
+//
+// IMPORTANT:
+// - Your UI offers MAJOR and NATURAL MINOR. Bass currently has explicit MAJOR
+//   maps only (you can add minor maps later). If Bass+Minor is selected,
+//   we fall back to the diatonic natural minor formula.
+// =====================================================================
+
+// Normalize note strings so the app can accept "c" or "C" consistently.
+function normalizeNoteName(n){
+  const s = String(n || "").trim();
+  if(!s) return s;
+  // Keep sharps as "#", force first letter to uppercase.
+  return s.length === 1 ? s.toUpperCase() : (s[0].toUpperCase() + s.slice(1));
+}
+
+// Canonical 12-note wheel used for fallback math + note-to-midi conversion.
+const CHROMATIC = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+
+// Steps for major / natural minor scales (in semitones)
+const MAJOR_STEPS = [0,2,4,5,7,9,11];
+const MINOR_STEPS = [0,2,3,5,7,8,10];
+
+// Bass Guitar (MAJOR) key map provided by you
+const BASS_KEYS_MAJOR = [
+  { name: "C",  scale: ["c","d","e","f","g","a","b"] },
+  { name: "D",  scale: ["d","e","F#","g","a","b","C#"] },
+  { name: "E",  scale: ["e","F#","G#","a","b","C#","D#"] },
+  { name: "F",  scale: ["f","g","a","A#","c","d","e"] },
+  { name: "G",  scale: ["g","a","b","c","d","e","F#"] },
+  { name: "A",  scale: ["a","b","C#","d","e","F#","G#"] },
+  { name: "B",  scale: ["b","c","d","D#","f","g","a"] },
+];
+const BASS_KEYS_MINOR = [
+  { name: "C",  scale: ["C","D","D#","F","G","G#","A#"] },
+  { name: "D",  scale: ["D","E","F","G","A","A#","C"] },
+  { name: "E",  scale: ["E","F#","G","A","B","C","D"] },
+  { name: "F",  scale: ["F","G","G#","A#","C","C#","D#"] },
+  { name: "G",  scale: ["G","A","A#","C","D","D#","F"] },
+  { name: "A",  scale: ["A","B","C","D","E","F","G"] },
+  { name: "B",  scale: ["B","C#","D","E","F#","G","A"] },
+];
+
+// Instrument map (extend this later with your own keys / chord-code systems)
+const INSTRUMENT_KEYMAP = {
+  bass: {
+    major: BASS_KEYS_MAJOR,
+    minor: BASS_KEYS_MINOR
+   
+  },
+  guitar: {
+    // currently uses fallback formula (diatonic)
+  },
+  piano: {
+    // currently uses fallback formula (diatonic)
+  }
+};
+
+// Fallback: build scale array of 7 notes from root + type (diatonic math)
+function buildScale(root, type){
+  const r = normalizeNoteName(root);
+  const rootIdx = CHROMATIC.indexOf(r);
+  const steps = (type === "minor") ? MINOR_STEPS : MAJOR_STEPS;
+  if(rootIdx < 0) return ["C","D","E","F","G","A","B"]; // safe fallback
+  return steps.map(semi => CHROMATIC[(rootIdx + semi) % 12]);
+}
+
+// Main resolver used by the trainer:
+// returns the 7-note scale for (instrument, root, type).
+function getScaleNotes(){
+  const instrument = $("instrument").value;
+  const type = $("scaleType").value; // "major" | "minor"
+  const root = normalizeNoteName($("scaleRoot").value);
+
+  const inst = INSTRUMENT_KEYMAP[instrument];
+  const mapped = inst && inst[type];
+  if(Array.isArray(mapped) && mapped.length){
+    const hit = mapped.find(k => normalizeNoteName(k.name) === root);
+    if(hit && Array.isArray(hit.scale) && hit.scale.length === 7){
+      return hit.scale.map(normalizeNoteName);
+    }
+  }
+
+  // not mapped -> fall back to diatonic formula
+  return buildScale(root, type).map(normalizeNoteName);
+}
+
+// Convert note -> midi number -> frequency (used for "Play note")
+function noteToMidi(note, octave=4){
+  const idx = CHROMATIC.indexOf(normalizeNoteName(note));
+  if(idx < 0) return 60;
+  return 60 + idx + (octave - 4) * 12;
+}
+function midiToFreq(m){ return 440 * Math.pow(2, (m - 69) / 12); }
+
+// Audio context for "Play note" practice
+let toneCtx = null;
+function ensureToneAudio(){
+  if(!toneCtx) toneCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return toneCtx;
+}
+function playTone(freq, ms=450){
+  const ctx = ensureToneAudio();
+  if(ctx.state === "suspended") ctx.resume();
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = freq;
+
+  const t = ctx.currentTime;
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.30, t + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + ms/1000);
+
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + ms/1000 + 0.02);
+}
+
+// Speak toggle + helper
+let speakEnabled = true;
+function speakValue(text){
+  if(!speakEnabled) return;
+  if(!("speechSynthesis" in window)) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function syncSpeakToggle(){
+  $("speakToggle").textContent = `SPEAK: ${speakEnabled ? "ON" : "OFF"}`;
+  $("speakToggle").classList.toggle("on", speakEnabled);
+}
+$("speakToggle").addEventListener("click", () => {
+  speakEnabled = !speakEnabled;
+  syncSpeakToggle();
+});
+syncSpeakToggle();
+
+// Metronome mute toggle (controls clickMuted)
+function syncTrainingMetroToggleUI(){
+  if(METRONOME.clickMuted){
+    $("metroToggle").textContent = "METRONOME: OFF";
+    $("metroToggle").classList.remove("on");
+  } else {
+    $("metroToggle").textContent = "METRONOME: ON";
+    $("metroToggle").classList.add("on");
+  }
+}
+$("metroToggle").addEventListener("click", () => {
+  METRONOME.clickMuted = !METRONOME.clickMuted;
+  syncTrainingMetroToggleUI();
+  updateMetronomeConfigUI(true);
+});
+syncTrainingMetroToggleUI();
+
+// Trainer state variables
+let tRunning = false;
+let tScaleNotes = getScaleNotes();
+let tDegreeIdx = 0;
+let tDirection = 1;
+
+// Display helpers
+function tCurrentDegree(){ return tDegreeIdx + 1; }
+function tCurrentNote(){ return tScaleNotes[tDegreeIdx]; }
+function tScaleName(){
+  const root = $("scaleRoot").value;
+  const type = ($("scaleType").value === "minor") ? "Minor" : "Major";
+  return `${root} ${type}`;
+}
+function tDisplayText(){
+  return ($("displayMode").value === "notes") ? tCurrentNote() : String(tCurrentDegree());
+}
+
+// Show current target on UI
+function tShowTarget(){
+  $("bigNote").textContent = tDisplayText();
+  $("scaleBadge").textContent = tScaleName();
+
+  // If currently in quiz mode, update quiz options
+  if($("practiceType").value === "quiz") tRenderQuiz();
+}
+
+// Beat switch rules: control when the target changes
+function shouldSwitchOnBeat(beatNum){
+  const mode = $("beatSwitch").value;
+  if(mode === "every") return true;
+  if(mode === "first") return beatNum === 1;
+  if(mode === "every2") return beatNum % 2 === 0;
+  if(mode === "one_three") return beatNum === 1 || beatNum === 3;
+  if(mode === "one_four") return beatNum === 1 || beatNum === 4;
+  return true;
+}
+
+// Order modes for selecting next degree
+function advanceTargetByOrder(){
+  const order = $("orderMode").value;
+
+  if(order === "ascending"){
+    tDegreeIdx = (tDegreeIdx + 1) % 7;
+  } else if(order === "asc_desc"){
+    tDegreeIdx += tDirection;
+    if(tDegreeIdx >= 6){ tDegreeIdx = 6; tDirection = -1; }
+    else if(tDegreeIdx <= 0){ tDegreeIdx = 0; tDirection = 1; }
+  } else if(order === "random"){
+    tDegreeIdx = Math.floor(Math.random() * 7);
+  }
+  // freestyle does not auto advance
+  tShowTarget();
+}
+
+// Execute action depending on practiceType
+function runPracticeAction(){
+  const type = $("practiceType").value;
+  if(type === "quiz") return;
+
+  if(type === "speak"){
+    speakValue(tDisplayText());
+  } else if(type === "play"){
+    const freq = midiToFreq(noteToMidi(tCurrentNote(), 4));
+    playTone(freq, 450);
+  }
+}
+
+// Freestyle: clicking big display advances (only when NOT quiz)
+$("bigDisplay").addEventListener("click", () => {
+  if($("practiceType").value === "quiz") return;
+
+  if($("orderMode").value === "freestyle"){
+    tDegreeIdx = (tDegreeIdx + 1) % 7;
+    tShowTarget();
+    if(tRunning) runPracticeAction();
+  }
+});
+
+
+/* =====================================================================
+   7) QUIZ
+   ===================================================================== */
+
+// Fisher–Yates shuffle
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// pick count items excluding a set
+function uniqueRandomChoices(pool, count, excludeSet){
+  const picks = [];
+  const safePool = pool.filter(x => !excludeSet.has(x));
+  while(picks.length < count && safePool.length){
+    const idx = Math.floor(Math.random()*safePool.length);
+    picks.push(safePool.splice(idx,1)[0]);
+  }
+  return picks;
+}
+
+let tLocked = false;
+
+// Create quiz UI options based on display mode
+function tRenderQuiz(){
+  $("quizBox").style.display = "grid";
+  $("answers").innerHTML = "";
+  tLocked = false;
+
+  const display = $("displayMode").value;
+  const correctDegree = tCurrentDegree();
+  const correctNote = tCurrentNote();
+
+  if(display === "notes"){
+    $("quizRule").textContent = "Rule: Notes → pick the Nashville number";
+
+    const correct = String(correctDegree);
+    const pool = ["1","2","3","4","5","6","7"];
+    const wrongs = uniqueRandomChoices(pool, 3, new Set([correct]));
+    const options = shuffle([correct, ...wrongs]);
+
+    options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "answerBtn";
+      btn.type = "button";
+      btn.textContent = opt;
+      btn.addEventListener("click", () => tHandleAnswer(btn, opt, correct));
+      $("answers").appendChild(btn);
+    });
+
+  } else {
+    $("quizRule").textContent = "Rule: Nashville # → pick the note name";
+
+    const correct = correctNote;
+    const pool = tScaleNotes;
+    const wrongs = uniqueRandomChoices(pool, 3, new Set([correct]));
+    const options = shuffle([correct, ...wrongs]);
+
+    options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "answerBtn";
+      btn.type = "button";
+      btn.textContent = opt;
+      btn.addEventListener("click", () => tHandleAnswer(btn, opt, correct));
+      $("answers").appendChild(btn);
+    });
+  }
+}
+
+// Quiz answer handling: highlight correct/wrong, update streak
+function tHandleAnswer(clickedBtn, chosen, correct){
+  if(tLocked) return;
+  tLocked = true;
+
+  // highlight correct answer
+  [...$("answers").querySelectorAll(".answerBtn")].forEach(b => {
+    if(b.textContent === correct) b.classList.add("correct");
+  });
+
+  if(chosen !== correct){
+    // wrong: reset streak
+    clickedBtn.classList.add("wrong");
+    currentQuizScore = 0;
+    saveStats(); updateScoreUI();
+    setTimeout(() => { tLocked = false; }, 350);
+    return;
+  }
+
+  // correct: increment streak
+  currentQuizScore += 1;
+  if(currentQuizScore > STATS.quizHighScore) STATS.quizHighScore = currentQuizScore;
+  saveStats(); updateScoreUI();
+
+  // move to new random degree
+  setTimeout(() => {
+    tLocked = false;
+    tDegreeIdx = Math.floor(Math.random() * 7);
+    tShowTarget();
+  }, 450);
+}
+
+// Next button: force new question
+$("nextBtn").addEventListener("click", () => {
+  if($("practiceType").value !== "quiz") return;
+  tDegreeIdx = Math.floor(Math.random() * 7);
+  tShowTarget();
+});
+
+
+/* =====================================================================
+   Trainer rebuild when dropdowns change
+   ===================================================================== */
+
+function tRebuild(){
+  // rebuild scale
+  tScaleNotes = getScaleNotes();
+  tDegreeIdx = 0;
+  tDirection = 1;
+  tShowTarget();
+
+  // quiz visibility + session behavior
+  if($("practiceType").value !== "quiz"){
+    stopQuizSession();
+    $("quizBox").style.display = "none";
+  } else {
+    $("quizBox").style.display = "grid";
+    tRenderQuiz();
+    if(tRunning) startQuizSession();
+
+    // quiz mode: stop metronome (your original rule)
+    if(METRONOME.running){
+      stopMetronome();
+    }
+    setActiveBeat($("trainingBeats"), 1);
+  }
+}
+
+// bind rebuild to all relevant selects
+["scaleRoot","scaleType","displayMode","orderMode","beatSwitch","practiceType","instrument"].forEach(id=>{
+  $(id).addEventListener("change", tRebuild);
+});
+
+
+/* =====================================================================
+   Main training Start/Stop button
+   ===================================================================== */
+
+$("toggleBtn").addEventListener("click", () => {
+  // Ensure audio unlocked on first click (important for iOS)
+  ensureAudio();
+
+  tRunning = !tRunning;
+
+  // Practice session timer
+  if(tRunning) startPracticeSession();
+  else { stopPracticeSession(); stopQuizSession(); }
+
+  if(tRunning){
+    $("toggleBtn").textContent = "Stop";
+    $("toggleBtn").classList.add("running");
+    tShowTarget();
+
+    if($("practiceType").value === "quiz"){
+      startQuizSession();
+      if(METRONOME.running) stopMetronome();
+    } else {
+      // start metronome automatically when training starts
+      if(!METRONOME.running) startMetronome();
+    }
+
+    // If metronome isn't running (or quiz), still do an immediate action
+    if(!METRONOME.running) runPracticeAction();
+
+  } else {
+    $("toggleBtn").textContent = "Start";
+    $("toggleBtn").classList.remove("running");
+    if(METRONOME.running) stopMetronome();
+  }
+
+  updateMetronomeConfigUI(true);
+});
+
+
+/* =====================================================================
+   Metronome -> Trainer hook
+   - Trainer listens to beat ticks and changes target when needed.
+   ===================================================================== */
+
+METRONOME.subscribers.push((p) => {
+  if(!tRunning) return;
+  if($("practiceType").value === "quiz") return;
+
+  // Only act on beat-start (subTick == 0)
+  if(p.subTick !== 0) return;
+
+  // Check switch rule
+  if(!shouldSwitchOnBeat(p.beat)) return;
+
+  // Freestyle does not auto-advance
+  if($("orderMode").value !== "freestyle"){
+    advanceTargetByOrder();
+  }
+
+  runPracticeAction();
+});
+
+
+/* =====================================================================
+   Init UI
+   ===================================================================== */
+tShowTarget();
+updateMetronomeConfigUI(true);
+
+</script>
+</body>
+</html>
