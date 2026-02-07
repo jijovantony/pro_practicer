@@ -1,2355 +1,4034 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Pro Practicer</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pro Practicer</title>
+<style>
+        :root {
+            --bg-gradient-start: #f5f3ff;
+            --bg-gradient-end: #fdf4ff;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --border-color: #e2e8f0;
+            --input-bg: #ffffff;
+            --input-border: #e2e8f0;
+            --input-focus: #8b5cf6;
+            --toggle-inactive: #cbd5e1;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --shadow-lg: rgba(0, 0, 0, 0.15);
+            --hover-bg: #f8fafc;
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #ec4899;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+        }
 
-  <style>
-    /* =========================================================
-       UI THEME TOKENS (Edit colors here only)
-       ---------------------------------------------------------
-       HOW TO CHANGE THE LOOK:
-       - Yellow mode: :root variables
-       - Dark mode  : [data-theme="dark"] variables
-       - Tile radius: --radius
-       - Spacing     : --gap
-    ========================================================= */
-    :root{
-      --radius: 22px;
-      --gap: 14px;
+        [data-theme="dark"] {
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #1e1b4b;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #334155;
+            --input-border: #475569;
+            --input-focus: #a78bfa;
+            --toggle-inactive: #475569;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --shadow-lg: rgba(0, 0, 0, 0.6);
+            --hover-bg: #334155;
+            --accent-primary: #a78bfa;
+            --accent-secondary: #f472b6;
+            --accent-success: #34d399;
+            --accent-warning: #fbbf24;
+            --accent-danger: #f87171;
+        }
 
-      /* Yellow theme */
-      --appBg: #FFD84D;
-      --cardBg: #FFFFFF;
-      --cardBg2:#FFFFFF;
-      --stroke: rgba(0,0,0,.10);
-      --stroke2: rgba(0,0,0,.14);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-      --text: rgba(0,0,0,.92);
-      --muted: rgba(0,0,0,.62);
-      --muted2: rgba(0,0,0,.52);
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            transition: background 0.3s ease;
+        }
 
-      --shadowSoft: rgba(0,0,0,.12);
+        .app-container {
+            height: 100vh;
+            width: 100vw;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            overflow: hidden;
+            position: relative;
+            transition: background 0.3s ease;
+        }
 
-      --accent: #000;
-      --accentSoft: rgba(0,0,0,.06);
+        .page-indicator {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 10;
+        }
 
-      --beat: rgba(0,0,0,.10);
-      --beatActive: rgba(0,0,0,.75);
-      --beat1: rgba(255,70,70,.55);
-      --beat1Border: rgba(255,70,70,.75);
+        .indicator-dot {
+            height: 6px;
+            border-radius: 4px;
+            background: var(--border-color);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
 
-      --majorGreen: #0E7A5F;
-      --majorGreenDark: #0B5F49;
-      --majorGreenText: #FFFFFF;
-      --majorGreenMuted: rgba(255,255,255,.86);
+        .indicator-dot.active {
+            width: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
 
-      --noteYellow: #FFD84D;
-      --noteYellowSoft: #FFE88A;
+        .indicator-dot:not(.active) {
+            width: 6px;
+        }
 
-      --btnMinH: 46px;
-    }
+        .indicator-dot:not(.active):hover {
+            background: var(--accent-primary);
+            opacity: 0.6;
+        }
 
-    [data-theme="dark"]{
-      --appBg: #070A14;
-      --cardBg: rgba(255,255,255,.06);
-      --cardBg2: rgba(255,255,255,.04);
-      --stroke: rgba(255,255,255,.10);
-      --stroke2: rgba(255,255,255,.14);
+        .theme-toggle {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            z-index: 20;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 16px var(--shadow), 0 0 0 0 rgba(139, 92, 246, 0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.68);
-      --muted2: rgba(255,255,255,.55);
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px var(--shadow), 0 0 0 4px rgba(139, 92, 246, 0.1);
+            border-color: var(--accent-primary);
+        }
 
-      --shadowSoft: rgba(0,0,0,.25);
+        .theme-toggle:active {
+            transform: translateY(0);
+        }
 
-      --accent: #7c5cff;
-      --accentSoft: rgba(255,255,255,.10);
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
 
-      --beat: rgba(255,255,255,.12);
-      --beatActive: rgba(124,92,255,.45);
-      --beat1: rgba(255,60,60,.38);
-      --beat1Border: rgba(255,60,60,.70);
+        .theme-toggle:hover svg {
+            color: var(--accent-primary);
+        }
 
-      --majorGreen: rgba(255,255,255,.08);
-      --majorGreenDark: rgba(255,255,255,.06);
-      --majorGreenText: rgba(255,255,255,.92);
-      --majorGreenMuted: rgba(255,255,255,.72);
-    }
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+            color: var(--text-primary);
+            transition: transform 0.3s ease;
+        }
 
-    /* ============ base layout ============ */
-    *{ box-sizing: border-box; }
-    html, body{ height:100%; margin:0; }
-    body{
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: var(--appBg);
-      color: var(--text);
-    }
-    .app{
-      /* Mobile-first fallback */
-      min-height: 100vh;
-      min-height: 100svh;
-      padding: calc(env(safe-area-inset-top) + 14px)
-               calc(env(safe-area-inset-right) + 14px)
-               calc(env(safe-area-inset-bottom) + 14px)
-               calc(env(safe-area-inset-left) + 14px);
-      display: grid;
-      gap: var(--gap);
-    }
+        .theme-toggle:active svg {
+            transform: rotate(180deg);
+        }
 
-    /* Desktop layout (Training big left + Metronome/Score right) */
-    @media (min-width: 900px) and (orientation: landscape){
-      .app{
-      /* Mobile-first fallback */ grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr 1fr; }
-      .titleTile{ grid-column: 1 / -1; }
-      .training{ grid-column: 1; grid-row: 2 / span 2; }
-      .metronome{ grid-column: 2; grid-row: 2; }
-      .score{ grid-column: 2; grid-row: 3; }
-    }
+        .indicator-dot {
+            height: 6px;
+            border-radius: 3px;
+            background: #d1d5db;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
 
-    .tile{
-      border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
-      box-shadow: 0 18px 40px var(--shadowSoft);
-      border-radius: var(--radius);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
+        .indicator-dot.active {
+            width: 32px;
+            background: #a855f7;
+        }
 
-    .tile.major{
-      background: linear-gradient(180deg, var(--majorGreen), var(--majorGreenDark));
-      border: 1px solid rgba(0,0,0,.12);
-      color: var(--majorGreenText);
-    }
-    [data-theme="dark"] .tile.major{
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-      border: 1px solid rgba(255,255,255,.12);
-    }
+        .indicator-dot:not(.active) {
+            width: 6px;
+        }
 
-    .tileHeader{
-      padding: 14px 16px 12px;
-      display:flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      border-bottom: 1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,0));
-    }
-    .tile.major .tileHeader{
-      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0));
-      border-bottom: 1px solid rgba(255,255,255,.16);
-    }
+        .pages-container {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            transition: transform 0.3s ease-out;
+        }
 
-    .tileTitle{ margin:0; font-size: 14px; letter-spacing: .2px; }
-    .tileSub{ margin: 3px 0 0; font-size: 12px; color: var(--muted); }
-    .tile.major .tileSub{ color: var(--majorGreenMuted); }
+        .page {
+            min-width: 100%;
+            height: 100%;
+            padding: 24px;
+            overflow-y: auto;
+            padding-top: 48px;
+            padding-bottom: 80px;
+        }
 
-    .tileBody{
-      padding: 14px 16px 0;
-      display: grid;
-      gap: 10px;
-      height: 100%;
-      overflow: auto;
-      padding-bottom: 128px;
-      position: relative;
-    }
+        .page-label {
+            position: absolute;
+            bottom: 16px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+        }
 
-    /* ===== title tile ===== */
-    .titleTile{ position: sticky; top: 0; z-index: 10; }
+        .page-label-badge {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 10px 15px -3px var(--shadow);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
 
-@media (max-width: 900px){
-  .titleTile{ position: relative; top: auto; z-index: 1; }
+        .chord-display {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            color: white;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .chord-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .chord-name {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 32px;
+        }
+
+        .metronome-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .beat-indicator {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.1s ease;
+        }
+
+        .beat-indicator.active {
+            transform: scale(1.25);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .beat-indicator.active.accent {
+            background: #fcd34d;
+        }
+
+        .beat-indicator.active:not(.accent) {
+            background: white;
+        }
+
+        .start-stop-button {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 20px 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            cursor: pointer;
+            box-shadow: 
+                0 10px 40px rgba(139, 92, 246, 0.3),
+                0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-stop-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .start-stop-button:hover::before {
+            left: 100%;
+        }
+
+        .start-stop-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 15px 50px rgba(139, 92, 246, 0.4),
+                0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .start-stop-button:active {
+            transform: translateY(-1px);
+        }
+
+        .start-stop-button.playing {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 
+                0 10px 40px rgba(239, 68, 68, 0.3),
+                0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .start-stop-button.playing:hover {
+            box-shadow: 
+                0 15px 50px rgba(239, 68, 68, 0.4),
+                0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .button-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .config-tile {
+            background: var(--card-bg);
+            border-radius: 28px;
+            box-shadow: 
+                0 20px 50px -12px var(--shadow),
+                0 0 0 1px var(--border-color);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+        }
+
+        .config-tile:hover {
+            box-shadow: 
+                0 24px 60px -12px var(--shadow),
+                0 0 0 1px rgba(139, 92, 246, 0.2);
+        }
+
+        .config-header {
+            padding: 26px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--card-bg);
+        }
+
+        .config-header:hover {
+            background: var(--hover-bg);
+        }
+
+        .config-header:active {
+            background: var(--border-color);
+        }
+
+        .config-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .config-icon {
+            color: var(--accent-primary);
+            transition: all 0.3s ease;
+        }
+
+        .config-header:hover .config-icon {
+            transform: rotate(5deg) scale(1.1);
+        }
+
+        .config-title span {
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+
+        .config-chevron {
+            color: var(--text-secondary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .config-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .config-content.expanded {
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .config-body {
+            padding: 0 28px 28px 28px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-top: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+
+        select {
+            width: 100%;
+            padding: 16px 44px 16px 18px;
+            border: 2px solid var(--input-border);
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='%238b5cf6'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 22px;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        [data-theme="dark"] select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='%23a78bfa'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        select:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
+            transform: translateY(-1px);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12), 0 4px 16px rgba(139, 92, 246, 0.2);
+            transform: translateY(-1px);
+        }
+
+        select option {
+            padding: 14px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 18px;
+            padding: 4px 0;
+        }
+
+        .toggle-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: var(--toggle-inactive);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .toggle-switch:hover {
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 0 0 4px rgba(139, 92, 246, 0.1);
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            box-shadow: 
+                inset 0 1px 2px rgba(255,255,255,0.2),
+                0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(24px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .bpm-control-tile {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            border-radius: 28px;
+            padding: 32px 28px;
+            box-shadow: 
+                0 20px 60px -12px rgba(139, 92, 246, 0.4),
+                0 0 0 1px rgba(255,255,255,0.1);
+            color: white;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bpm-control-tile::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.5; }
+            50% { transform: scale(1.1) rotate(180deg); opacity: 0.8; }
+        }
+
+        .bpm-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 36px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .bpm-button {
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .bpm-button:hover {
+            background: rgba(255, 255, 255, 0.35);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .bpm-button:active {
+            transform: scale(0.95);
+        }
+
+        .bpm-display {
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+        }
+
+        .bpm-value {
+            font-size: 72px;
+            font-weight: 900;
+            line-height: 1;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            letter-spacing: -2px;
+        }
+
+        .bpm-label {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-top: 6px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .bpm-input {
+            font-size: 72px;
+            font-weight: 900;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid rgba(255,255,255,0.6);
+            color: white;
+            text-align: center;
+            width: 160px;
+            line-height: 1;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .bpm-input:focus {
+            outline: none;
+            border-bottom-color: white;
+        }
+
+        .volume-control {
+            margin-top: 24px;
+        }
+
+        .volume-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .volume-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .volume-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .profile-avatar {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 16px;
+            border-radius: 50%;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .profile-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px var(--shadow);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+        }
+
+        .task-item:hover {
+            background: var(--hover-bg);
+        }
+
+        .task-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .task-checkbox.completed {
+            background: #a855f7;
+            border-color: #a855f7;
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .task-text.completed {
+            color: var(--text-tertiary);
+            text-decoration: line-through;
+        }
+
+        .task-priority {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+
+        .priority-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .priority-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .priority-low {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .goal-item {
+            margin-bottom: 16px;
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .goal-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .goal-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #a855f7;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+            transition: background 0.3s ease;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #a855f7 0%, #ec4899 100%);
+            transition: width 0.3s ease;
+        }
+
+        .achievement-item {
+            padding: 16px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+        }
+
+        .achievement-item.unlocked {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+            border-color: #e9d5ff;
+        }
+
+        [data-theme="dark"] .achievement-item.unlocked {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(236, 72, 153, 0.15) 100%);
+            border-color: #6b21a8;
+        }
+
+        .achievement-item:not(.unlocked) {
+            opacity: 0.6;
+        }
+
+        .achievement-header {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .achievement-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #7c3aed;
+            transition: color 0.3s ease;
+        }
+
+        .achievement-title:not(.unlocked) {
+            color: var(--text-secondary);
+        }
+
+        .achievement-description {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .achievement-date {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            transition: color 0.3s ease;
+        }
+
+        .achievement-progress {
+            margin-top: 8px;
+        }
+
+        .achievement-progress-text {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .ramp-section {
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 16px;
+        }
+
+        .ramp-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .ramp-inputs {
+            display: grid;
+            gap: 12px;
+        }
+
+        .ramp-input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .ramp-input:focus {
+            outline: none;
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.1);
+        }
+
+        .ramp-reset-button {
+            width: 100%;
+            padding: 8px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .ramp-reset-button:hover {
+            background: #dc2626;
+        }
+
+        .subdivision-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .subdivision-button {
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .subdivision-button.active {
+            background: #a855f7;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(168, 85, 247, 0.3);
+        }
+
+        .subdivision-button:hover:not(.active) {
+            background: #e5e7eb;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .icon-sm {
+            width: 16px;
+            height: 16px;
+        }
+    
+        /* Ramp save button */
+.save-ramp-btn{
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.95);
+  font-weight: 900;
+  cursor: pointer;
 }
-    .headerContent{
-      padding: 18px;
-      display:flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-    .headerLeft{ min-width: 240px; display:flex; flex-direction: column; gap: 6px; }
-    .appTitle{ margin:0; font-size: clamp(22px, 3.8vw, 34px); font-weight: 950; line-height: 1.05; }
-    .appSubtitle{ margin:0; font-size: 13px; font-weight: 750; color: var(--muted); }
-    .appContact{ display:flex; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: 12px; font-weight: 800; }
-    .sep{ opacity:.65; }
+.save-ramp-btn:active{ transform: translateY(1px); }
+.ramp-save-hint{
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 750;
+  opacity: 0.75;
+  line-height: 1.25;
+}
 
-    .topControls{ display:flex; gap: 10px; align-items:center; flex-wrap: wrap; justify-content: flex-end; }
 
-    /* ===== controls ===== */
-    .selectBtn{
-      display:flex; align-items:center; gap: 10px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--stroke2);
-      background: var(--accentSoft);
-      color: var(--text);
-      min-height: var(--btnMinH);
-      white-space: nowrap;
-    }
-    .tile.major .selectBtn{
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.20);
-      color: #fff;
-    }
-    .selectBtn label{ font-size: 12px; color: var(--muted); font-weight: 800; }
-    .tile.major .selectBtn label{ color: rgba(255,255,255,.86); }
 
-    select{
-      background: transparent;
-      color: inherit;
-      border: none;
-      outline: none;
-      font-size: 13px;
-      font-weight: 900;
-      cursor: pointer;
-      max-width: 240px;
-    }
-    option{ color: #0b0d14; }
 
-    .iconBtn{
-      border:1px solid var(--stroke);
-      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
-      color: var(--text);
-      padding: 12px 14px;
-      border-radius: 14px;
-      cursor:pointer;
-      font-weight: 950;
-      min-height: 46px;
-      min-width: 52px;
-      user-select:none;
-    }
-    .tile.major .iconBtn{
-      background: rgba(255,255,255,.18);
-      border: 1px solid rgba(255,255,255,.22);
-      color:#fff;
-    }
 
-    .mBtn{
-      border: 1px solid var(--stroke2);
-      background: var(--accentSoft);
-      color: var(--text);
-      padding: 12px 14px;
-      border-radius: 14px;
-      cursor:pointer;
-      font-weight: 950;
-      min-height:46px;
-    }
-    .mBtn.primary{
-      border-color: rgba(0,0,0,.25);
-      background: var(--accent);
-      color: #fff;
-    }
-    .tile.major .mBtn.primary{
-      background:#000;
-      border-color: rgba(0,0,0,.30);
-      color:#fff;
-    }
 
-    .mToggle{
-      min-height: 38px;
-      padding: 8px 12px;
-      font-size: 12px;
-      border-radius: 12px;
-      font-weight: 900;
-      border:1px solid var(--stroke2);
-      background: var(--accentSoft);
-      cursor:pointer;
-    }
-    .tile.major .mToggle{
-      background: rgba(255,255,255,.18);
-      border: 1px solid rgba(255,255,255,.22);
-      color:#fff;
-    }
-    .mToggle.on{ background: rgba(0,0,0,.10); border-color: rgba(0,0,0,.22); }
-    .tile.major .mToggle.on{ background: rgba(0,0,0,.22); border-color: rgba(255,255,255,.18); }
 
-    /* ===== big training display ===== */
-    .bigDisplay{
-      border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.55));
-      border-radius: 18px;
-      display:grid;
-      place-items: center;
-      min-height: 280px;
-      position: relative;
-      overflow: hidden;
-      user-select: none;
-      cursor: pointer;
-    }
-    .tile.major .bigDisplay{
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.20);
-    }
 
-    .scaleBadge{
-      position: absolute; top: 10px; right: 10px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.85);
-      color: rgba(0,0,0,.78);
-      font-size: 12px;
-      font-weight: 900;
-    }
-    .tile.major .scaleBadge{
-      background: rgba(0,0,0,.25);
-      border: 1px solid rgba(255,255,255,.14);
-      color: rgba(255,255,255,.82);
-    }
 
-    .bigNote{
-      font-size: clamp(78px, 9vw, 150px);
-      font-weight: 950;
-      letter-spacing: 1px;
-      line-height: 1;
-      padding: 10px 14px;
-      transform: translateY(-8px);
-      color: var(--noteYellow);
-    }
-    .tile.major .bigNote{ color: var(--noteYellowSoft); }
 
-    .beatInside{
-      position:absolute; left:0; right:0; bottom: 14px;
-      display:flex; justify-content:center; gap:12px; flex-wrap: wrap;
-      pointer-events:none;
-    }
-    .beatDot{
-      width: 14px; height: 14px; border-radius: 999px;
-      border: 1px solid rgba(0,0,0,.22);
-      background: var(--beat);
-      box-shadow: 0 10px 22px var(--shadowSoft);
-      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
-    }
-    .beatDot.active{ background: var(--beatActive); transform: translateY(-2px) scale(1.10); }
-    .beatDot.accent.active{ background: var(--beat1); border-color: var(--beat1Border); }
 
-    /* ===== quiz ===== */
-    .quizBox{
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.18);
-      border-radius: 18px;
-      padding: 12px;
-      display:none;
-      gap: 10px;
-    }
-    [data-theme="yellow"] .quizBox{
-      border: 1px solid rgba(0,0,0,.12);
-      background: rgba(0,0,0,.06);
-    }
-    .quizTitle{
-      display:flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .answers{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 10px;
-    }
-    @media (max-width: 520px){
-      .answers{ grid-template-columns: 1fr; }
-    }
-    .answerBtn{
-      min-height: 48px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.20);
-      background: rgba(255,255,255,.10);
-      color: #fff;
-      font-weight: 950;
-      cursor: pointer;
-    }
-    [data-theme="yellow"] .answerBtn{
-      border: 1px solid rgba(0,0,0,.12);
-      background: rgba(255,255,255,.65);
-      color: rgba(0,0,0,.86);
-    }
-    .answerBtn.correct{ outline: 3px solid rgba(0,255,170,.55); }
-    .answerBtn.wrong{ outline: 3px solid rgba(255,60,60,.55); }
+/* === FIX: Equal-size ramp buttons in one row === */
+.ramp-actions{
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
 
-    .controlPanel{
-      border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
-      border-radius: 18px;
-      padding: 12px;
-      display:flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .tile.major .controlPanel{
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.20);
-    }
-    .leftGroup{ display:flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ramp-actions .ramp-btn{
+  flex: 1 1 0;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 14px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+}
 
-    .stickyAction{
-      position: absolute; left: 0; right: 0; bottom: 0;
-      padding: 14px 16px calc(env(safe-area-inset-bottom) + 14px);
-      background: linear-gradient(0deg, rgba(255,255,255,.70), rgba(255,255,255,0));
-      display:flex; justify-content: center;
-      pointer-events: none;
-    }
-    .tile.major .stickyAction{
-      background: linear-gradient(0deg, rgba(0,0,0,.35), rgba(0,0,0,0));
-    }
-    .bigToggle{
-      pointer-events: auto;
-      width: min(560px, 100%);
-      min-height: 62px;
-      border-radius: 18px;
-      border: 1px solid rgba(0,0,0,.25);
-      background: #000;
-      color: #fff;
-      font-weight: 980;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    .bigToggle.running{ background: rgba(255,90,90,.85); border-color: rgba(255,90,90,.40); }
 
-    /* ===== metronome tile ===== */
-    .chip{
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.85);
-      color: rgba(0,0,0,.78);
-      font-size: 12px;
-      font-weight: 900;
-    }
-    .tile.major .chip{
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.88);
-    }
+/* === FORCE equal width ramp buttons === */
+.ramp-actions{
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 12px;
+}
 
-    .metroConfigGrid{ display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
-    @media (max-width: 520px){ .metroConfigGrid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.ramp-actions > button{
+  flex: 1 1 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  box-sizing: border-box;
+  height: 52px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
 
-    .cfgPill{
-      border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
-      border-radius: 16px;
-      padding: 10px 10px;
-      min-height: 54px;
-      display: grid;
-      gap: 3px;
-      align-content: center;
-    }
-    .tile.major .cfgPill{
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.20);
-      color:#fff;
-    }
-    .cfgPill .k{ font-size: 11px; color: var(--muted2); font-weight: 900; text-transform: uppercase; }
-    .tile.major .cfgPill .k{ color: rgba(255,255,255,.70); }
-    .cfgPill .v{ font-size: 14px; font-weight: 950; color: var(--noteYellow); }
-    .tile.major .cfgPill .v{ color: var(--noteYellowSoft); }
+.ramp-actions > button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
 
-    .settingsPopover{
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.22);
-      border-radius: 18px;
-      padding: 12px;
-      display:none;
-      gap: 12px;
-    }
-    [data-theme="yellow"] .settingsPopover{
-      border: 1px solid rgba(0,0,0,.12);
-      background: rgba(0,0,0,.06);
-    }
-    .grid2{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 10px;
-    }
-    @media (max-width: 520px){ .grid2{ grid-template-columns: 1fr; } }
+.ramp-actions > button:active {
+  transform: translateY(0);
+}
 
-    .field{
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.08);
-      border-radius: 16px;
-      padding: 10px;
-      display:grid;
-      gap: 6px;
-    }
-    [data-theme="yellow"] .field{
-      border: 1px solid rgba(0,0,0,.12);
-      background: rgba(255,255,255,.65);
-    }
-    .field label{ font-size: 12px; font-weight: 900; color: rgba(255,255,255,.78); }
-    [data-theme="yellow"] .field label{ color: rgba(0,0,0,.66); }
-    .field input{
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.18);
-      color: #fff;
-      padding: 10px;
-      font-weight: 900;
-      outline: none;
-    }
-    [data-theme="yellow"] .field input{
-      border: 1px solid rgba(0,0,0,.12);
-      background: rgba(255,255,255,.85);
-      color: rgba(0,0,0,.85);
-    }
 
-    .metroBtns{ display:flex; gap: 10px; flex-wrap: wrap; justify-content:flex-start; }
-    .metroBpmCard{
-      border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
-      border-radius: 18px;
-      padding: 12px;
-      display:grid;
-      gap: 10px;
-    }
-    .tile.major .metroBpmCard{
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.20);
-      color:#fff;
-    }
 
-    .bpmRow{ display:grid; grid-template-columns: 1fr auto; gap: 10px; align-items:center; }
-    .bpmLeft{ display:flex; align-items: baseline; gap: 10px; min-width: 0; }
-    .bpmBig{ font-size: 44px; font-weight: 950; line-height: 1; cursor: pointer; user-select: none; color: var(--noteYellow); }
-    .tile.major .bpmBig{ color: var(--noteYellowSoft); }
-    .bpmUnit{ color: var(--muted); font-size: 12px; font-weight: 900; }
-    .tile.major .bpmUnit{ color: rgba(255,255,255,.68); }
 
-    .bpmEdit{
-      display:none;
-      width: 98px;
-      border-radius: 12px;
-      border: 1px solid var(--stroke2);
-      background: rgba(0,0,0,.10);
-      color: inherit;
-      padding: 10px 10px;
-      font-weight: 900;
-      font-size: 18px;
-      outline: none;
-      text-align: center;
-    }
+/* === Practice tile: center note/number, small scale+BPM in corner === */
+.chord-display{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
-    .pmBtns{ display:flex; gap:10px; }
-    .beatRow{ display:flex; justify-content:center; gap:12px; flex-wrap: wrap; padding-bottom: 2px; }
+.chord-top-row{
+  position: relative;
+  min-height: 72px; /* keeps room for corner pills */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    .metroControls{
-      border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
-      border-radius: 18px;
-      padding: 12px;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .tile.major .metroControls{
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.20);
-      color:#fff;
-    }
+.chord-main{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    .mStartStopBig{
-      min-height: 54px;
-      padding: 14px 16px;
-      border-radius: 16px;
-      border: 1px solid rgba(0,0,0,.25);
-      background: #000;
-      color: #fff;
-      font-weight: 980;
-      font-size: 18px;
-      cursor: pointer;
-    }
-    .mStartStopBig.running{ background: rgba(255,90,90,.85); }
+.chord-name.chord-center{
+  text-align: center;
+  font-weight: 1000;
+  font-size: 44px;
+  letter-spacing: 0.5px;
+  line-height: 1.05;
+}
 
-    .volWrap{ display:flex; align-items:center; gap: 10px; flex: 1 1 260px; justify-content: flex-end; min-width: 220px; }
-    .volWrap span{ font-size: 12px; color: var(--muted); font-weight: 900; min-width: 60px; }
-    .tile.major .volWrap span{ color: rgba(255,255,255,.68); }
-    input[type="range"]{ width: 100%; }
+.practice-meta.practice-meta-corner{
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
 
-    /* ===== score ===== */
-    .statsGrid{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    @media (max-width: 520px){ .statsGrid{ grid-template-columns: 1fr; } }
-    .statCard{
-      border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
-      border-radius: 18px;
-      padding: 14px;
-      min-height: 92px;
-      display: grid;
-      gap: 8px;
-    }
-    .tile.major .statCard{
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.20);
-      color:#fff;
-    }
-    .statCard .k{ font-size: 11px; color: var(--muted2); font-weight: 900; text-transform: uppercase; }
-    .tile.major .statCard .k{ color: rgba(255,255,255,.70); }
-    .statCard .v{ font-size: 24px; font-weight: 980; color: var(--noteYellow); }
-    .tile.major .statCard .v{ color: var(--noteYellowSoft); }
-    .statCard .s{ font-size: 12px; color: var(--muted); }
-    .tile.major .statCard .s{ color: rgba(255,255,255,.68); }
+.meta-pill{
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-weight: 950;
+  font-size: 11px;
+  line-height: 1;
+  border: 1px solid rgba(255,255,255,0.18);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
 
-    .shareBox{
-      border: 1px solid var(--stroke2);
-      background: linear-gradient(180deg, var(--cardBg), var(--cardBg2));
-      border-radius: 18px;
-      padding: 12px;
-      display:none;
-      gap: 10px;
-    }
-    .shareText{
-      border: 1px dashed var(--stroke2);
-      border-radius: 16px;
-      padding: 12px;
-      font-size: 12px;
-      white-space: pre-wrap;
-      line-height: 1.35;
-    }
-    .shareBtns{ display:flex; justify-content:flex-end; gap:10px; flex-wrap: wrap; }
+.meta-scale{
+  background: linear-gradient(135deg, rgba(37,99,235,0.35), rgba(99,102,241,0.25));
+  color: rgba(255,255,255,0.95);
+}
 
-    .centerPlaceholder{ text-align:center; color: var(--muted); padding: 10px 18px 18px; }
-    .tile.major .centerPlaceholder{ color: rgba(255,255,255,.80); }
-  </style>
+.meta-bpm{
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.92);
+}
+
+.meta-bpm-label{
+  font-size: 9px;
+  opacity: 0.85;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+}
+
+.meta-bpm-value{
+  font-size: 12px;
+}
+
+
+
+
+
+
+
+/* === Premium Ramp Chart Card === */
+.ramp-panel{
+  border-radius: 24px;
+  padding: 24px 20px 20px;
+  background:
+    radial-gradient(800px 300px at 30% 0%, rgba(16,185,129,0.25), transparent 70%),
+    radial-gradient(600px 250px at 100% 30%, rgba(5,150,105,0.2), transparent 65%),
+    linear-gradient(135deg, #0f766e 0%, #047857 100%);
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(255,255,255,0.05) inset,
+    0 -2px 0 rgba(255,255,255,0.08) inset;
+  backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+}
+
+.ramp-panel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+}
+
+.ramp-panel-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.ramp-panel-title{
+  display:inline-flex;
+  align-items:center;
+  gap: 12px;
+  color:#fff;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+
+.ramp-panel-title::before{
+  content:"";
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  box-shadow: 
+    0 0 0 6px rgba(16,185,129,0.2), 
+    0 0 16px rgba(16,185,129,0.6),
+    0 2px 8px rgba(0,0,0,0.3);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.ramp-panel-sub{
+  display:inline-flex;
+  align-items:center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  color:#fff;
+  font-weight: 800;
+  font-size: 13px;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 4px 16px rgba(0,0,0,0.25),
+    0 0 0 1px rgba(255,255,255,0.1) inset;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+#rampChart{
+  width: 100%;
+  height: 200px;
+  display:block;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(16,185,129,0.15) 0%, rgba(5,150,105,0.08) 100%);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow:
+    0 16px 40px rgba(0,0,0,0.35) inset,
+    0 2px 0 rgba(255,255,255,0.12),
+    0 0 0 1px rgba(255,255,255,0.05);
+  position: relative;
+  z-index: 1;
+  padding: 16px;
+}
+
+
+
+/* === Profile: Daily Tasks === */
+.section-header-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.task-create{
+  margin-top: 16px;
+  display:flex;
+  gap: 12px;
+  align-items:stretch;
+}
+
+.task-create select,
+.task-create input{
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 2px solid var(--input-border);
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.task-create button{
+  padding: 14px 24px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.task-create button:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+.task-create button:active{
+  transform: translateY(0);
+}
+
+.tasks-list{
+  margin-top: 16px;
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+}
+
+.daily-task{
+  display:flex;
+  align-items:center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 2px solid var(--border-color);
+  background: var(--card-bg);
+  cursor:pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.daily-task:hover{
+  border-color: var(--accent-primary);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.daily-task:active{ 
+  transform: translateY(0); 
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.daily-task-check{
+  width: 26px;
+  height: 26px;
+  border-radius: 10px;
+  border: 2.5px solid var(--border-color);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex: 0 0 auto;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--input-bg);
+}
+
+.daily-task:hover .daily-task-check:not(.done){
+  border-color: var(--accent-primary);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.daily-task-check.done{
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.daily-task-text{
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.daily-task-text.done{
+  text-decoration: line-through;
+  opacity: 0.5;
+  color: var(--text-tertiary);
+}
+
+.daily-task-del{
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  border: 2px solid var(--border-color);
+  background: var(--hover-bg);
+  color: var(--text-secondary);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.daily-task-del:hover{
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #dc2626;
+  transform: scale(1.05);
+}
+
+.daily-task-del:active{
+  transform: scale(0.95);
+}
+
+[data-theme="dark"] .daily-task-del:hover{
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #f87171;
+  color: #fca5a5;
+}
+
+.tasks-footer{
+  margin-top: 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 2px solid var(--border-color);
+}
+
+.tasks-summary{
+  display:flex;
+  flex-direction:column;
+  gap: 4px;
+}
+
+.tasks-summary-label{
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tasks-summary-value{
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--accent-primary);
+  line-height: 1;
+}
+
+.tasks-reset-btn{
+  padding: 12px 24px;
+  background: var(--hover-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 14px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tasks-reset-btn:hover{
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+[data-theme="dark"] .tasks-reset-btn:hover{
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #f87171;
+  color: #fca5a5;
+}
+
+.tasks-summary-label{
+  font-size: 11px;
+  font-weight: 850;
+  opacity: 0.7;
+}
+
+.tasks-summary-value{
+  font-size: 13px;
+  font-weight: 950;
+}
+
+/* === Weekly chart === */
+.weekly-chart-wrap{
+  margin-top: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.16);
+  padding: 10px;
+}
+
+#weeklyChart{
+  width: 100%;
+  height: 170px;
+  display:block;
+}
+
+.weekly-legend{
+  margin-top: 10px;
+  display:flex;
+  justify-content:space-between;
+  font-size: 11px;
+  font-weight: 850;
+  opacity: 0.75;
+}
+
+.share-btn{
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.95);
+  font-weight: 950;
+  cursor:pointer;
+  white-space: nowrap;
+}
+.share-btn:active{ transform: translateY(1px); }
+
+
+/* ===== Page 3: Tasks + Weekly ===== */
+.task-editor-list{
+  margin-top: 10px;
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+
+.task-editor-item{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+}
+
+.task-editor-name{
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 950;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.task-editor-time{
+  flex: 0 0 auto;
+  display:flex;
+  align-items:center;
+  gap: 8px;
+}
+
+.time-input{
+  width: 74px;
+  padding: 10px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.18);
+  color: rgba(255,255,255,0.95);
+  font-weight: 950;
+  text-align: right;
+}
+
+.time-suffix{
+  font-size: 12px;
+  font-weight: 900;
+  opacity: 0.75;
+}
+
+.task-editor-actions{
+  margin-top: 12px;
+  display:flex;
+  gap: 10px;
+}
+
+.btn-primary, .btn-secondary{
+  flex: 1 1 0;
+  width: 0;
+  height: 48px;
+  border-radius: 14px;
+  font-weight: 950;
+  cursor:pointer;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.btn-primary{
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+}
+.btn-secondary{
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.95);
+}
+
+.today-summary{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap: 2px;
+}
+.today-summary-label{
+  font-size: 11px;
+  font-weight: 850;
+  opacity: 0.7;
+}
+.today-summary-value{
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.today-task-list{
+  margin-top: 12px;
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+
+.today-task{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+}
+
+.today-task-check{
+  width: 22px;
+  height: 22px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  flex: 0 0 auto;
+}
+
+.today-task-check.done{
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.today-task-text{
+  flex: 1 1 auto;
+  min-width:0;
+  font-weight: 950;
+  font-size: 13px;
+}
+
+.today-task-meta{
+  flex: 0 0 auto;
+  font-weight: 950;
+  font-size: 12px;
+  opacity: 0.85;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.16);
+  border: 1px solid rgba(255,255,255,0.14);
+}
+
+.today-hint{
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 0.65;
+}
+
+.goal-pill{
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.10);
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.weekly-chart-wrap{
+  margin-top: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.16);
+  padding: 10px;
+}
+
+#weeklyChart{
+  width: 100%;
+  height: 190px;
+  display:block;
+}
+
+.weekly-legend{
+  margin-top: 10px;
+  display:flex;
+  justify-content:space-between;
+  font-size: 11px;
+  font-weight: 850;
+  opacity: 0.75;
+}
+
+.share-row{
+  margin-top: 12px;
+  padding-bottom: 18px;
+}
+.share-btn-wide{
+  width: 100%;
+  height: 52px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.95);
+  font-weight: 950;
+  cursor:pointer;
+}
+.share-btn-wide:active{ transform: translateY(1px); }
+
+/* ===== Layout tweak: Bigger practice tile + smaller ramp tile (Page 1) ===== */
+#page1 .chord-display{
+  padding: 40px 36px !important;
+  border-radius: 32px !important;
+  margin-bottom: 28px !important;
+}
+
+#page1 .chord-top-row{ min-height: 84px !important; }
+
+#page1 .chord-name.chord-center{
+  font-size: 56px !important;
+  letter-spacing: 0.6px !important;
+}
+
+#page1 .metronome-visual{
+  margin-top: 18px !important;
+  margin-bottom: 32px !important;
+}
+
+#page1 .start-stop-button{
+  padding: 24px 72px !important;
+  border-radius: 22px !important;
+  font-size: 22px !important;
+}
+
+/* Ramp mini card: make it compact */
+#page1 .ramp-panel{
+  padding: 14px 14px 12px !important;
+  border-radius: 20px !important;
+}
+
+#page1 .ramp-panel-header{
+  margin-bottom: 10px !important;
+  gap: 10px !important;
+}
+
+#page1 .ramp-panel-title{
+  font-size: 13px !important;
+  font-weight: 850 !important;
+}
+
+#page1 .ramp-panel-sub{
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+}
+
+#page1 #rampChart{
+  height: 90px !important;   /* compact preview */
+  padding: 10px !important;
+  border-radius: 14px !important;
+}
+
+
+
+/* ===== Header Tile (Theme-aware background) ===== */
+.header-tile{
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--header-bg, rgba(255,255,255,0.85));
+  border: 1px solid rgba(0,0,0,0.08);
+  color: var(--header-text, #111827);
+}
+
+/* Dark theme override */
+body.dark .header-tile{
+  background: rgba(17,24,39,0.85);
+  border-color: rgba(255,255,255,0.12);
+  color: #f9fafb;
+}
+
+.header-title{
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+}
+
+.header-subtitle{
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+
+</style>
 </head>
-
 <body>
-  <main class="app">
+<div class="app-container">
+<!-- Page Indicators -->
+<div class="page-indicator">
+<div class="indicator-dot active" onclick="goToPage(0)"></div>
+<div class="indicator-dot" onclick="goToPage(1)"></div>
+<div class="indicator-dot" onclick="goToPage(2)"></div>
+</div>
+<!-- Theme Toggle -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+<svg fill="currentColor" id="sunIcon" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd"></path>
+</svg>
+<svg fill="currentColor" id="moonIcon" style="display: none;" viewbox="0 0 20 20">
+<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+</svg>
+</button>
+<!-- Pages Container -->
+<div class="pages-container" id="pagesContainer">
+<!-- Page 1: Practice -->
+<div class="page" id="page1">
 
-    <!-- =========================================================
-         TITLE TILE
-         - Edit "Your Name" and "your@email.com"
-         - Theme toggle button is on the right
-    ========================================================== -->
-    <section class="tile titleTile" id="titleTile">
-      <div class="headerContent">
-        <div class="headerLeft">
-          <h1 class="appTitle">PRO PRACTICER</h1>
-          <p class="appSubtitle">Practice Makes Perfect</p>
-          <div class="appContact">
-            <span class="contactName">Jijo Antony</span>
-            <span class="sep">•</span>
-            <span class="contactInfo"></span>
-            <span class="sep">•</span>
-            <span class="contactInfo">© <span id="yearNow"></span></span>
-          </div>
-        </div>
+<!-- Header Tile -->
+<div class="header-tile">
+  <div class="header-title">Pro PRACTICER</div>
+  <div class="header-subtitle">Practice Makes Perfect   * by JVA</div>
+</div>
 
-        <div class="headerRight">
-          <button class="iconBtn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">☀️</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================
-         TILE 1: MUSIC TRAINING
-         - Big display shows current note or Nashville number
-         - Freestyle mode: clicking big display advances
-         - Quiz mode: shows answer buttons + streak tracking
-    ========================================================== -->
-    <section class="tile major training" id="trainingTile">
-      <header class="tileHeader">
-        <div>
-          <h2 class="tileTitle"> TRAINER</h2>
-        </div>
-
-        <div class="topControls">
-          <div class="selectBtn">
-            <label for="instrument">INSTRUMENT</label>
-            <select id="instrument">
-              <option value="bass">BASS GUITAR</option>
-              <option value="guitar">GUITAR</option>
-              <option value="piano">PIANO</option>
-            </select>
-          </div>
-
-          <div class="selectBtn">
-            <label for="scaleRoot">SCALE</label>
-            <select id="scaleRoot" title="Scale root">
-              <option>C</option><option>C#</option><option>D</option><option>D#</option><option>E</option>
-              <option>F</option><option>F#</option><option>G</option><option>G#</option><option>A</option>
-              <option>A#</option><option>B</option>
-            </select>
-            <select id="scaleType" title="Scale type">
-              <option value="major">MAJOR</option>
-              <option value="minor">NATURAL MINOR</option>
-              <option value="major_chords">MAJOR CHORDS</option>
-              <option value="minor_chords">MINOR CHORDS</option>
-            </select>
-          </div>
-
-          <div class="selectBtn">
-            <label for="displayMode">DISPLAY</label>
-            <select id="displayMode">
-              <option value="notes">NOTES</option>
-              <option value="nashville">NASHVILLE #</option>
-            </select>
-          </div>
-        </div>
-      </header>
-
-      <div class="tileBody">
-        <!-- Big display: main training UI -->
-        <div class="bigDisplay" id="bigDisplay" title="Freestyle: tap to advance">
-          <div class="scaleBadge" id="scaleBadge">C MAJOR</div>
-          <div class="bigNote" id="bigNote">C</div>
-          <div class="beatInside" id="trainingBeats" aria-label="training beat indicator inside"></div>
-        </div>
-
-        <!-- QUIZ BOX (shown only when Practice = Quiz) -->
-        <div class="quizBox" id="quizBox">
-          <div class="quizTitle">
-            <div>
-              <strong>Choose the correct answer</strong><br/>
-              <span id="quizRule">Rule: Notes → pick Nashville number</span>
-            </div>
-            <button class="answerBtn" id="nextBtn" type="button" style="font-size:14px; padding:10px 12px;">Next</button>
-          </div>
-          <div class="answers" id="answers"></div>
-        </div>
-
-        <div class="controlPanel">
-          <div class="leftGroup">
-
-            <!-- ORDER MODE:
-                 - random: random degrees 1..7
-                 - ascending: 1..7 loop
-                 - asc_desc: 1..7 then 7..1 then repeat
-                 - freestyle: user click advances, metronome does NOT auto-advance
-            -->
-            <div class="selectBtn">
-              <label for="orderMode">ORDER</label>
-              <select id="orderMode">
-                <option value="random">RANDOM</option>
-                <option value="ascending">Ascending</option>
-                <option value="asc_desc">Ascending & Descending</option>
-                <option value="freestyle">Freestyle</option>
-              </select>
-            </div>
-
-            <!-- PRACTICE TYPE:
-                 - speak: uses speechSynthesis to say note/number
-                 - play : plays a sine tone using WebAudio
-                 - quiz : shows answer UI; metronome stops automatically
-            -->
-            <div class="selectBtn">
-              <label for="practiceType">PRACTICE</label>
-              <select id="practiceType">
-                <option value="speak">SPEAK</option>
-                <option value="play">PLAY NOTE</option>
-                <option value="quiz">WITHOUT INSTRUMENT(QUIZ)</option>
-              </select>
-            </div>
-
-            <!-- SWITCHING RULE:
-                 Controls when the target changes based on beat
-            -->
-            <div class="selectBtn">
-              <label for="beatSwitch">SWITCH CHORD</label>
-              <select id="beatSwitch">
-                <option value="every">IN EVERY BEAT</option>
-                <option value="first">ONLY AT THE FIRST BEAT</option>
-                <option value="every2">EVERY 2nd BEAT</option>
-                <option value="one_three"> 1 & 3</option>
-                <option value="one_four"> 1 & 4</option>
-              </select>
-            </div>
-
-            <!-- Toggles -->
-            <button class="mToggle on" id="metroToggle" type="button">METRONOME: ON</button>
-            <button class="mToggle on" id="speakToggle" type="button">SPEAK ACCISTANCE: ON</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Main start/stop for training -->
-      <div class="stickyAction">
-        <button class="bigToggle" id="toggleBtn" type="button">START</button>
-      </div>
-    </section>
-
-    <!-- =========================================================
-         TILE 2: METRONOME
-         - Uses WebAudio lookahead scheduler for stable timing
-         - Gear shows settings (ramp/range/subdivision/tap tempo)
-    ========================================================== -->
-    <section class="tile major metronome" id="metronomeTile">
-      <header class="tileHeader">
-        <div>
-          <h2 class="tileTitle">METRONOME</h2>
-        </div>
-        <div class="chip" id="tsChip">4/4</div>
-      </header>
-
-      <div class="tileBody" id="metronomeBody">
-
-        <!-- Current configuration preview -->
-        <div class="metroConfigGrid" aria-label="metronome current configuration">
-          <div class="cfgPill"><div class="k">Time Sig</div><div class="v" id="cfgTS">4/4</div></div>
-          <div class="cfgPill"><div class="k">Subdivision</div><div class="v" id="cfgSub">1</div></div>
-          <div class="cfgPill"><div class="k">Range</div><div class="v" id="cfgRange">30–260</div></div>
-          <div class="cfgPill"><div class="k">Ramp</div><div class="v" id="cfgRamp">Off</div></div>
-        </div>
-
-        <!-- Settings popover (open with ⚙️) -->
-        <div class="settingsPopover" id="metroSettings">
-          <div class="grid2">
-
-            <div class="selectBtn" style="width:100%; justify-content:space-between;">
-              <label for="timeSig">Time Sig</label>
-              <select id="timeSig">
-                <option value="2/4">2/4</option>
-                <option value="3/4">3/4</option>
-                <option value="4/4" selected>4/4</option>
-                <option value="5/4">5/4</option>
-                <option value="6/8">6/8</option>
-                <option value="7/8">7/8</option>
-                <option value="9/8">9/8</option>
-                <option value="12/8">12/8</option>
-              </select>
-            </div>
-
-            <div class="selectBtn" style="width:100%; justify-content:space-between;">
-              <label for="subdivision">Subdivision</label>
-              <select id="subdivision">
-                <option value="1" selected>Quarter (1)</option>
-                <option value="2">Eighth (2)</option>
-                <option value="3">Triplet (3)</option>
-                <option value="4">Sixteenth (4)</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="rangeMin">Range Min (BPM)</label>
-              <input id="rangeMin" type="number" value="30" min="1" max="399" />
-            </div>
-            <div class="field">
-              <label for="rangeMax">Range Max (BPM)</label>
-              <input id="rangeMax" type="number" value="260" min="2" max="400" />
-            </div>
-
-            <!-- Ramp controls:
-                 Ramp moves BPM from Start -> End by Step.
-                 Mode decides if step happens every X seconds or every X beats.
-            -->
-            <div class="field">
-              <label for="rampStart">Ramp Start BPM</label>
-              <input id="rampStart" type="number" value="70" min="1" max="400" />
-            </div>
-            <div class="field">
-              <label for="rampEnd">Ramp End BPM</label>
-              <input id="rampEnd" type="number" value="140" min="1" max="400" />
-            </div>
-
-            <div class="field">
-              <label for="rampStep">Ramp Step (BPM)</label>
-              <input id="rampStep" type="number" value="5" min="1" max="50" />
-            </div>
-
-            <div class="selectBtn" style="width:100%; justify-content:space-between;">
-              <label for="rampMode">Ramp Mode</label>
-              <select id="rampMode">
-                <option value="time" selected>Increase by Time</option>
-                <option value="beats">Increase by Beats</option>
-              </select>
-            </div>
-
-            <div class="field" id="rampTimeField">
-              <label for="rampTime">Step Interval (sec)</label>
-              <input id="rampTime" type="number" value="60" min="1" max="3600" />
-            </div>
-
-            <div class="field" id="rampBeatsField" style="display:none;">
-              <label for="rampBeats">Step Interval (beats)</label>
-              <input id="rampBeats" type="number" value="4" min="1" max="9999" />
-            </div>
-          </div>
-
-          <div class="metroBtns" style="justify-content:space-between;">
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="mBtn primary" id="rampArm" type="button">RAMP: OFF</button>
-              <button class="mBtn" id="rampReset" type="button">RESET RAMP</button>
-            </div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="mBtn" id="mTap" type="button">TAP TEMPO</button>
-              <button class="mBtn" id="mAccent" type="button">Accent: ON</button>
-            </div>
-          </div>
-
-          <div class="metroBtns" style="justify-content:flex-end;">
-            <button class="mBtn" id="closeSettings" type="button">CLOSE</button>
-          </div>
-        </div>
-
-        <!-- BPM card -->
-        <div class="metroBpmCard" id="metroBpmCard">
-          <div class="bpmRow">
-            <div class="bpmLeft">
-              <div class="bpmBig" id="bpmBig" title="Tap to edit">100</div>
-              <div class="bpmUnit">BPM</div>
-              <input class="bpmEdit" id="bpmEdit" type="number" min="1" max="400" value="100" />
-            </div>
-
-            <div class="pmBtns">
-              <button class="iconBtn" id="bpmDown" type="button">−</button>
-              <button class="iconBtn" id="bpmUp" type="button">+</button>
-            </div>
-          </div>
-
-          <div class="beatRow" id="metroBeats" aria-label="metronome beats"></div>
-        </div>
-
-        <!-- Metronome controls row -->
-        <div class="metroControls">
-          <button class="mStartStopBig" id="mStartStop" type="button">START</button>
-
-          <div class="volWrap">
-            <span>Volume</span>
-            <input id="mVol" type="range" min="0" max="100" value="60" />
-          </div>
-
-          <button class="iconBtn" id="gearBtn" type="button" title="Settings">⚙️</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================
-         TILE 3: SCORE
-         - Total practice time
-         - Best quiz session time
-         - Highest quiz score
-         - Top BPM (from metronome usage)
-         - Share/copy summary
-    ========================================================== -->
-    <section class="tile major score" id="scoreTile">
-      <header class="tileHeader">
-        <div>
-          <h2 class="tileTitle">Score &amp; Achievements</h2>
-          <p class="tileSub">Saved on this device</p>
-        </div>
-
-        <div class="topControls">
-          <button class="mBtn primary" id="shareBtn" type="button">SHARE</button>
-        </div>
-      </header>
-
-      <div class="tileBody">
-        <div class="statsGrid">
-          <div class="statCard">
-            <div class="k">Total practice time</div>
-            <div class="v" id="statTotalTime">0m</div>
-            <div class="s">Training tile</div>
-          </div>
-
-          <div class="statCard">
-            <div class="k">Best continuous quiz time</div>
-            <div class="v" id="statBestQuizTime">0m</div>
-            <div class="s">Quiz mode only</div>
-          </div>
-
-          <div class="statCard">
-            <div class="k">Highest quiz score</div>
-            <div class="v" id="statHighScore">0</div>
-            <div class="s">Best streak</div>
-          </div>
-
-          <div class="statCard">
-            <div class="k">Most practiced BPM</div>
-            <div class="v" id="statTopBpm">—</div>
-            <div class="s">From metronome usage</div>
-          </div>
-        </div>
-
-        <div class="shareBox" id="shareBox" aria-live="polite" style="display:none;">
-          <div class="shareText" id="shareText"></div>
-          <div class="shareBtns">
-            <button class="mBtn primary" id="copyShare" type="button">Copy</button>
-            <button class="mBtn" id="closeShare" type="button">Close</button>
-          </div>
-        </div>
-
-        <div class="centerPlaceholder">
-          Tip: Use Quiz mode for score, and keep the metronome running to build BPM stats.
-        </div>
-      </div>
-    </section>
-
-  </main>
-
+<!-- Chord Display Tile -->
+<div class="chord-display">
+<div class="chord-top-row">
+<div class="chord-main">
+<div class="chord-name chord-center" id="chordName">C Major</div>
+</div>
+<div class="practice-meta practice-meta-corner">
+<div class="meta-pill meta-scale" id="scalePill">C Major</div>
+</div>
+<div class="meta-pill meta-bpm">
+<span class="meta-bpm-label">BPM</span>
+<span class="meta-bpm-value" id="bpmMiniValue">120</span>
+</div>
+</div>
+<!-- Metronome Visual -->
+<div class="metronome-visual" id="metronomeVisual">
+<!-- Beat indicators will be generated by JS -->
+</div>
+<!-- Start/Stop Button -->
+<button class="start-stop-button" id="startStopButton" onclick="togglePlay()">
+<svg class="button-icon" fill="currentColor" id="playIcon" viewbox="0 0 20 20">
+<path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path>
+</svg>
+<span id="buttonText">Start</span>
+<svg class="button-icon" fill="currentColor" id="pauseIcon" style="display: none;" viewbox="0 0 20 20">
+<path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zM12.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z"></path>
+</svg>
+</button>
+</div>
+<!-- Ramp Mini Chart (shown only when Ramp is ON) -->
+<div class="ramp-panel" id="rampMini" style="display:none;">
+<div class="ramp-panel-header">
+<div class="ramp-panel-title">Ramp BPM</div>
+<div class="ramp-panel-sub" id="rampMiniText">120 → 140</div>
+</div>
+<canvas height="78" id="rampChart" width="320"></canvas>
+</div>
+<!-- Practice Configuration Tile -->
+<div class="config-tile">
+<div class="config-header" onclick="toggleConfig('practice')">
+<div class="config-title">
+<svg class="icon config-icon" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Practice Settings</span>
+</div>
+<svg class="icon config-chevron" fill="none" id="practiceChevron" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="config-content" id="practiceConfig">
+<div class="config-body">
+<!-- Instrument & Scale Row -->
+<div class="form-row">
+<div class="form-group">
+<label>Instrument</label>
+<select id="instrument">
+<option>Acoustic guitar</option>
+<option>Bass guitar</option>
+<option>Piano</option>
+<option>Drums</option>
+</select>
+</div>
+<div class="form-group">
+<label>Scale root</label>
+<select id="scaleRoot">
+<option>C</option><option>D</option><option>E</option><option>F</option>
+<option>G</option><option>A</option><option>B</option>
+</select>
+</div>
+</div>
+<!-- Scale Type & Display Row -->
+<div class="form-row">
+<div class="form-group">
+<label>Scale type</label>
+<select id="scaleType">
+<option>Major</option>
+<option>Natural minor</option>
+</select>
+</div>
+<div class="form-group">
+<label>Display</label>
+<select id="displayType">
+<option>Notes/Chords</option>
+<option>Nashville Number</option>
+</select>
+</div>
+</div>
+<!-- Order & Practice Mode Row -->
+<div class="form-row">
+<div class="form-group">
+<label>Order</label>
+<select id="orderMode">
+<option>Random</option>
+<option>Ascending</option>
+<option>Ascending and descending</option>
+<option>Custom</option>
+</select>
+</div>
+<div class="form-group">
+<label>Practice mode</label>
+<select id="practiceMode">
+<option>Speak note/number</option>
+<option>Play the note</option>
+<option>Game</option>
+</select>
+</div>
+</div>
+<!-- Custom list -->
+<div class="form-group" id="customListGroup" style="display:none;">
+<label>Custom list (comma separated)</label>
+<input class="ramp-input" id="customList" type="text" value="C Major, G Major, A Minor, F Major"/>
+</div>
+<!-- Switch chord (Full Width) -->
+<div class="form-group">
+<label>Switch chord</label>
+<select id="switchRule">
+<option>Every beat</option>
+<option>Every 1st beat</option>
+<option>Every 2nd beat</option>
+<option>1st and 3rd beat</option>
+<option>1st and 4th beat</option>
+<option>4th beat</option>
+</select>
+</div>
+<!-- Toggle Switches -->
+<div class="toggle-group">
+<span class="toggle-label">Metronome On/Off</span>
+<div class="toggle-switch active" id="metronomeToggle" onclick="toggleSwitch('metronome')">
+<div class="toggle-slider"></div>
+</div>
+</div>
+<div class="toggle-group">
+<span class="toggle-label">Speak On/Off</span>
+<div class="toggle-switch active" id="noteSpeakToggle" onclick="toggleSwitch('noteSpeak')">
+<div class="toggle-slider"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="page" id="page2">
+<h2 class="page-title">Metronome</h2>
+<!-- BPM Control Tile -->
+<div class="bpm-control-tile">
+<div class="bpm-controls">
+<button class="bpm-button" onclick="changeBPM(-1)">-</button>
+<div class="bpm-display" id="bpmDisplay" onclick="enableBPMEdit()">
+<div class="bpm-value" id="bpmValue">120</div>
+<div class="bpm-label">BPM</div>
+</div>
+<button class="bpm-button" onclick="changeBPM(1)">+</button>
+</div>
+<!-- Metronome Visual -->
+<div class="metronome-visual" id="metronomeVisual2">
+<!-- Beat indicators will be generated by JS -->
+</div>
+<!-- Volume Control -->
+<div class="volume-control">
+<div class="volume-header">
+<span class="volume-label">Volume</span>
+<span class="volume-value" id="volumeValue">70%</span>
+</div>
+<input id="volumeSlider" max="100" min="0" oninput="updateVolume(this.value)" type="range" value="70"/>
+</div>
+</div>
+<!-- Metronome Settings Tile -->
+<div class="config-tile">
+<div class="config-header" onclick="toggleConfig('metronome')">
+<div class="config-title">
+<svg class="icon config-icon" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Metronome Settings</span>
+</div>
+<svg class="icon config-chevron" fill="none" id="metronomeChevron" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="config-content" id="metronomeConfig">
+<div class="config-body">
+<!-- Tone & Time Signature Row -->
+<div class="form-row">
+<div class="form-group">
+<label>Metronome Tone</label>
+<select id="metronomeTone">
+<option>Classic Click</option>
+<option>Wood Block</option>
+<option>Digital Beep</option>
+<option>Cowbell</option>
+<option>Hi-Hat</option>
+<option>Snare</option>
+<option>Soft Click</option>
+</select>
+</div>
+<div class="form-group">
+<label>Time Signature</label>
+<select id="timeSignature" onchange="updateTimeSignature()">
+<option>2/4</option>
+<option>3/4</option>
+<option selected="">4/4</option>
+<option>5/4</option>
+<option>6/8</option>
+<option>7/8</option>
+<option>9/8</option>
+<option>12/8</option>
+<option>3/8</option>
+<option>5/8</option>
+</select>
+</div>
+</div>
+<!-- Subdivision & Accent Row -->
+<div class="form-row">
+<div class="form-group">
+<label>Subdivision</label>
+<select id="subdivision">
+<option>Quarter</option>
+<option>Eighth</option>
+<option>Triplet</option>
+<option>Sixteenth</option>
+</select>
+</div>
+<div class="form-group">
+<label>Metronome Accent</label>
+<div class="toggle-group" style="margin-top: 12px;">
+<div class="toggle-switch active" id="accentToggle" onclick="toggleSwitch('accent')">
+<div class="toggle-slider"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Ramp Settings Section -->
+<div class="ramp-section">
+<div class="ramp-header">
+<span class="toggle-label">Ramp Settings</span>
+<div class="toggle-switch" id="rampToggle" onclick="toggleSwitch('ramp')">
+<div class="toggle-slider"></div>
+</div>
+</div>
+<div id="rampInputs" style="display: none;">
+<div class="ramp-inputs">
+<div class="form-row">
+<div>
+<label style="font-size: 12px; color: #6b7280; margin-bottom: 4px; display: block;">Ramp Start BPM</label>
+<input class="ramp-input" id="rampStartBPM" max="240" min="40" type="number" value="60"/>
+</div>
+<div>
+<label style="font-size: 12px; color: #6b7280; margin-bottom: 4px; display: block;">Ramp End BPM</label>
+<input class="ramp-input" id="rampEndBPM" max="240" min="40" type="number" value="140"/>
+</div>
+</div>
+</div>
+<div class="form-row">
+<div>
+<label style="font-size: 12px; color: #6b7280; margin-bottom: 4px; display: block;">Increase by (BPM)</label>
+<input class="ramp-input" id="rampStepBPM" max="20" min="1" type="number" value="5"/>
+</div>
+<div>
+<label style="font-size: 12px; color: #6b7280; margin-bottom: 4px; display: block;">Step Time (sec)</label>
+<input class="ramp-input" id="rampStepTime" max="300" min="5" type="number" value="30"/>
+</div>
+</div>
+<div class="ramp-actions"><button class="ramp-btn ramp-btn-reset" onclick="resetRamp()">Reset Ramp</button>
+<button class="ramp-btn ramp-btn-start" onclick="saveRampAndStartPractice()" type="button">Save &amp; Start</button></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="page" id="page3"><div class="profile-header">
+<div class="profile-info">
+<div class="profile-avatar">
+<svg class="icon" fill="currentColor" style="width: 32px; height: 32px;" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" fill-rule="evenodd"></path>
+</svg>
+</div>
+<div>
+<div class="profile-name">Music Learner</div>
+<div class="profile-subtitle">Guitar • Intermediate</div>
+</div>
+</div>
+<div class="profile-stats">
+<div class="stat-item">
+<div class="stat-value">7</div>
+<div class="stat-label">Day Streak 🔥</div>
+</div>
+<div class="stat-item">
+<div class="stat-value">142</div>
+<div class="stat-label">Hours</div>
+</div>
+<div class="stat-item">
+<div class="stat-value" id="tasksCompleted">1/4</div>
+<div class="stat-label">Tasks</div>
+</div>
+</div>
+</div><div class="section-card" id="taskEditorTile">
+<div class="section-header">
+<div class="section-title">Create / edit daily tasks</div>
+<div class="section-subtitle">Set time for each exercise</div>
+</div>
+<div class="task-editor-list" id="taskEditorList"></div>
+<div class="task-editor-actions">
+<button class="btn-secondary" onclick="resetDefaultTasks()" type="button">Reset to default</button>
+<button class="btn-primary" onclick="saveTaskTemplates()" type="button">Save tasks</button>
+</div>
+</div><div class="section-card" id="todayTasksTile">
+<div class="section-header">
+<div>
+<div class="section-title">Today’s tasks</div>
+<div class="section-subtitle" id="todayDateLabel"></div>
+</div>
+<div class="today-summary">
+<div class="today-summary-label">Total</div>
+<div class="today-summary-value"><span id="todayDoneMin">0</span>/<span id="todayTotalMin">0</span> min</div>
+</div>
+</div>
+<div class="today-task-list" id="todayTaskList"></div>
+<div class="today-hint">Tap the checkbox to mark done / undone.</div>
+</div><div class="section-card" id="weeklyTile">
+<div class="section-header">
+<div>
+<div class="section-title">Last 7 days</div>
+<div class="section-subtitle">Total practice time (minutes) + goal highlights</div>
+</div>
+<div class="goal-pill">
+      Goal: <span id="goalMinutesLabel">30</span> min/day
+    </div>
+</div>
+<div class="weekly-chart-wrap">
+<canvas height="190" id="weeklyChart" width="360"></canvas>
+</div>
+<div class="weekly-legend" id="weeklyLegend"></div>
+</div><div class="share-row">
+<button class="share-btn-wide" onclick="shareAchievementPdf()" type="button">Share achievement as PDF</button>
+</div></div></div>
+</div>
+<!-- Page 2: Metronome -->
+<!-- Page 3: Profile -->
+<!-- Page Label -->
+<div class="page-label">
+<div class="page-label-badge" id="pageLabel">Practice</div>
+</div>
 <script>
-/* =====================================================================
-   INSTRUMENT TRAINER (Documented)
-   =====================================================================
+/* ===== Core State ===== */
+let currentPage = 0;
+let isPlaying = false;
 
-   ✅ How this code is organized:
+// Metronome / timing
+let bpm = 120;
+let beatsPerMeasure = 4;          // from time signature top number
+let subdivision = "Quarter";      // Quarter/Eighth/Triplet/Sixteenth
+let volume = 70;                 // 0..100
+let beatTimer = null;
+let beatIndex = 0;               // 0..beatsPerMeasure-1 (main beat)
 
-   1) CONFIG QUICK EDIT
-      - change defaults, storage keys, BPM limits, etc.
+// Practice state
+let practicePos = 0;
+let practiceDir = 1;
+let practiceList = [];
 
-   2) Helpers (DOM, clamp, time formatting)
-
-   3) Theme
-      - persisted in localStorage
-
-   4) Stats
-      - persisted in localStorage (debounced saving)
-      - tracks: total practice time, best quiz time, high score, top BPM
-
-   5) Metronome (WebAudio scheduler)
-      - stable timing using "lookahead" scheduling
-      - supports: BPM, +/- , edit BPM, time sig, subdivision,
-                  mute click, accent, volume,
-                  ramp (time/beats), tap tempo, range min/max
-
-   6) Trainer
-      - scale generation
-      - order modes: random / ascending / asc_desc / freestyle
-      - practice modes: speak / play / quiz
-      - beatSwitch: when to change target
-
-   7) Quiz
-      - 4 answers, correct/wrong highlighting
-      - streak scoring
-      - quiz session time tracking
-
-   ---------------------------------------------------------------------
-   IMPORTANT NOTE ABOUT AUDIO (Mobile / iOS):
-   - AudioContext (metronome clicks and play-tone) is locked until user
-     interacts (button click). We ensure it in Start actions.
-   ===================================================================== */
-
-
-/* =====================================================================
-   1) CONFIG QUICK EDIT (edit these values safely)
-   ===================================================================== */
-
-// LocalStorage keys (change these if you want a fresh reset for users)
-const THEME_KEY = "instrument_trainer_theme_v2";
-const STATS_KEY = "instrument_trainer_stats_v2";
-
-// Default ramp settings (metronome starts ramp from here)
-const DEFAULT_RAMP = {
-  start: 100,
-  end: 140,
-  step: 2,
-  mode: "time",   // "time" or "beats"
-  timeSec: 2,
-  beats: 4
+// Settings (toggles + metronome options)
+const settings = {
+  practice: {
+    metronomeEnabled: true,
+    noteSpeakEnabled: true,
+    instrument: "Acoustic guitar",
+    scaleRoot: "C",
+    scaleType: "Major",
+    displayType: "Notes/Chords",
+    switchRule: "Every beat",
+    practiceMode: "Speak note/number",
+    orderMode: "Random",
+    customList: "C Major, G Major, A Minor, F Major",  },
+  metronome: {
+    accentEnabled: true,
+    rampEnabled: false,
+    rampStartBPM: 60,
+    rampEndBPM: 140,
+    rampStepBPM: 5,
+    rampStepTime: 30
+  }
 };
 
-// BPM clamps (range inputs also enforce this, but this is safety)
-const BPM_MIN_HARD = 1;
-const BPM_MAX_HARD = 400;
+// Ramp runtime
+let rampCurrentBpm = bpm;
+let rampLastStepAt = 0; // performance.now()
+let rampSeries = [];    // recent bpm points for chart
 
+function resetRampRuntime(){
+  rampCurrentBpm = bpm;
+  rampLastStepAt = performance.now();
+  rampSeries = [rampCurrentBpm];
+  updateRampMiniUI();
+}
 
-/* =====================================================================
-   2) HELPERS
-   ===================================================================== */
+function rampTick(){
+  if(!settings.metronome.rampEnabled) return;
+  const now = performance.now();
+  const stepMs = Math.max(1, settings.metronome.rampStepTime) * 1000;
 
-document.getElementById("yearNow").textContent = new Date().getFullYear();
+  if(now - rampLastStepAt >= stepMs){
+    rampLastStepAt = now;
+    rampCurrentBpm = Math.min(
+      settings.metronome.rampEndBPM,
+      rampCurrentBpm + settings.metronome.rampStepBPM
+    );
+  }
+}
 
-// DOM shortcut (id only)
-const $ = (id) => document.getElementById(id);
-
-// clamp number into [a,b]
-const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
-
-// high precision time (ms)
-const nowMs = () => performance.now();
-
-// pretty duration formatter
-function formatDuration(ms){
-  ms = Math.max(0, Math.floor(ms||0));
-  const s = Math.floor(ms/1000);
-  const h = Math.floor(s/3600);
-  const m = Math.floor((s%3600)/60);
-  const ss = s%60;
-  if(h>0) return `${h}h ${m}m`;
-  if(m>0) return `${m}m ${ss}s`;
-  return `${ss}s`;
+function effectiveBpm(){
+  return settings.metronome.rampEnabled ? rampCurrentBpm : bpm;
 }
 
 
-/* =====================================================================
-   3) THEME (persisted)
-   ===================================================================== */
-
-function getPreferredTheme(){
-  // User saved theme wins
-  const saved = localStorage.getItem(THEME_KEY);
-  if(saved === "yellow" || saved === "dark") return saved;
-
-  // Otherwise use OS preference
-  return (matchMedia && matchMedia("(prefers-color-scheme: dark)").matches)
-    ? "dark"
-    : "yellow";
+function updateMetronomeBpmTile(){
+  // Always show current BPM in the metronome BPM tile (Page 2)
+  const v = document.getElementById('bpmValue');
+  if(v) v.textContent = String(effectiveBpm());
+}
+function updateBpmMini(){
+  const el = document.getElementById('bpmMiniValue');
+  if(el) el.textContent = String(effectiveBpm());
+  updateMetronomeBpmTile();
 }
 
-function setTheme(theme){
-  document.documentElement.setAttribute("data-theme", theme);
-  localStorage.setItem(THEME_KEY, theme);
-  $("themeToggle").textContent = (theme === "dark") ? "☾" : "☀️";
+function updateRampMiniUI(){
+  const box = document.getElementById('rampMini');
+  if(!box) return;
+  box.style.display = settings.metronome.rampEnabled ? 'block' : 'none';
+  const t = document.getElementById('rampMiniText');
+  if(t){
+    t.textContent = `${rampCurrentBpm} → ${settings.metronome.rampEndBPM}`;
+  }
+  drawRampChart();
 }
 
-function toggleTheme(){
-  const cur = document.documentElement.getAttribute("data-theme") || "yellow";
-  setTheme(cur === "dark" ? "yellow" : "dark");
+function drawRampChart(){
+  const c = document.getElementById('rampChart');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const w = c.width, h = c.height;
+
+  if(settings.metronome.rampEnabled){
+    rampSeries.push(rampCurrentBpm);
+    if(rampSeries.length > 60) rampSeries.shift();
+  }else{
+    rampSeries = [bpm];
+  }
+
+  ctx.clearRect(0,0,w,h);
+
+  // grid
+  ctx.globalAlpha = 0.25;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for(let i=1;i<=3;i++){
+    const y = (h/4)*i;
+    ctx.moveTo(0,y);
+    ctx.lineTo(w,y);
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  const minB = Math.min(...rampSeries, settings.metronome.rampStartBPM, settings.metronome.rampEndBPM);
+  const maxB = Math.max(...rampSeries, settings.metronome.rampStartBPM, settings.metronome.rampEndBPM);
+  const span = Math.max(1, maxB - minB);
+
+  ctx.beginPath();
+  rampSeries.forEach((v, i)=>{
+    const x = (i/((rampSeries.length-1) || 1))*w;
+    const y = h - ((v - minB)/span)*h;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.stroke();
+
+  const last = rampSeries[rampSeries.length-1];
+  const x = w;
+  const y = h - ((last - minB)/span)*h;
+  ctx.beginPath();
+  ctx.arc(x, y, 3.2, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.fill();
 }
 
-// init theme
-setTheme(getPreferredTheme());
-$("themeToggle").addEventListener("click", toggleTheme);
+// Touch swipe (RIGHT -> next, LEFT -> previous)
+let touchStartX = 0;
+let touchEndX = 0;
 
+/* ===== Data for Profile ===== */
+let tasks = [
+  { id: 1, title: 'Practice chord transitions', completed: false, priority: 'high' },
+  { id: 2, title: 'Metronome practice 20 min', completed: true, priority: 'medium' },
+  { id: 3, title: 'Learn new scale pattern', completed: false, priority: 'high' },
+  { id: 4, title: 'Review theory notes', completed: false, priority: 'low' }
+];
 
-/* =====================================================================
-   4) STATS (persisted, debounced)
-   ===================================================================== */
+let goals = [
+  { id: 1, title: 'Master all major scales', progress: 75, target: 100, unit: '%' },
+  { id: 2, title: 'Play at 160 BPM', progress: 145, target: 160, unit: 'BPM' },
+  { id: 3, title: '30-day practice streak', progress: 7, target: 30, unit: 'days' },
+  { id: 4, title: 'Learn 100 chords', progress: 42, target: 100, unit: 'chords' }
+];
 
-const STATS_DEFAULT = {
-  totalPracticeMs: 0,
-  bestQuizSessionMs: 0,
-  quizHighScore: 0,
-  bpmCounts: {} // {"120": 30, ...}
-};
+let achievements = [
+  { id: 1, title: '7-Day Streak', description: 'Practice for 7 consecutive days', unlocked: true, date: '2026-02-01' },
+  { id: 2, title: 'Speed Demon', description: 'Practice at 160 BPM', unlocked: true, date: '2026-01-28' },
+  { id: 3, title: 'Scale Master', description: 'Complete all major scales', unlocked: false, progress: 75 },
+  { id: 4, title: '100 Hours', description: 'Reach 100 hours of practice', unlocked: true, date: '2026-01-15' },
+  { id: 5, title: 'Chord Champion', description: 'Master 50 different chords', unlocked: false, progress: 42 }
+];
 
-// load stats safely
-function loadStats(){
+/* ===== Theme ===== */
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+
+  document.getElementById('sunIcon').style.display = (newTheme === 'dark') ? 'none' : 'block';
+  document.getElementById('moonIcon').style.display = (newTheme === 'dark') ? 'block' : 'none';
+}
+
+/* ===== Navigation ===== */
+function handleSwipe() {
+  const dx = touchEndX - touchStartX;
+  if (Math.abs(dx) < 75) return;
+
+  if (dx > 0) {
+    // Swipe RIGHT -> next
+    goToPage(Math.min(currentPage + 1, 2));
+  } else {
+    // Swipe LEFT -> previous
+    goToPage(Math.max(currentPage - 1, 0));
+  }
+}
+
+function goToPage(pageNum) {
+  currentPage = pageNum;
+  const container = document.getElementById('pagesContainer');
+  container.style.transform = `translateX(-${currentPage * 100}%)`;
+
+  document.querySelectorAll('.indicator-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === currentPage);
+  });
+
+  const labels = ['Practice', 'Metronome', 'Profile'];
+  document.getElementById('pageLabel').textContent = labels[currentPage];
+}
+
+/* ===== UI Expanders ===== */
+function toggleConfig(type) {
+  const config = document.getElementById(`${type}Config`);
+  const chevron = document.getElementById(`${type}Chevron`);
+  const isExpanded = config.classList.contains('expanded');
+
+  config.classList.toggle('expanded');
+  chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+/* ===== Toggle Switches ===== */
+function toggleSwitch(type) {
+  const toggle = document.getElementById(`${type}Toggle`);
+  if (!toggle) return;
+
+  toggle.classList.toggle('active');
+
+  if (type === 'metronome') {
+    settings.practice.metronomeEnabled = toggle.classList.contains('active');
+    updateBeatIndicators();
+  resetRampRuntime();
+  updateBpmMini();
+  updateRampMiniUI();
+    if (isPlaying) restartEngine();
+  } else if (type === 'noteSpeak') {
+    settings.practice.noteSpeakEnabled = toggle.classList.contains('active');
+  } else if (type === 'accent') {
+    settings.metronome.accentEnabled = toggle.classList.contains('active');
+    updateBeatIndicators();
+  } else if (type === 'ramp') {
+    settings.metronome.rampEnabled = toggle.classList.contains('active');
+    document.getElementById('rampInputs').style.display =
+      settings.metronome.rampEnabled ? 'block' : 'none';
+    resetRampRuntime();
+    updateBpmMini();
+    updateRampMiniUI();
+    if(isPlaying) restartEngine();
+  }
+}
+
+/* ===== Practice generation ===== */
+const chromatic = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const majorIntervals = [0,2,4,5,7,9,11];
+const naturalMinorIntervals = [0,2,3,5,7,8,10];
+
+function noteIndex(n){ return chromatic.indexOf(n); }
+function transpose(root, semis){
+  const i = noteIndex(root);
+  return i < 0 ? root : chromatic[(i + semis + 1200) % 12];
+}
+function getScaleNotes(root, type){
+  const ints = (type === "Natural minor") ? naturalMinorIntervals : majorIntervals;
+  return ints.map(semi => transpose(root, semi));
+}
+
+function getDiatonicTriads(root, type){
+  const notes = getScaleNotes(root, type);
+  const isMajor = (type === "Major");
+
+  const qualitiesMajor = ["", "m", "m", "", "", "m", "dim"];
+  const qualitiesMinor = ["m", "dim", "", "m", "m", "", ""];
+
+  // Nashville numeric degrees (NO roman)
+  const nashMajor = ["1","2","3","4","5","6","7"];
+  const nashMinor = ["1","2","3","4","5","6","7"];
+
+  const qualities = isMajor ? qualitiesMajor : qualitiesMinor;
+  const nash = isMajor ? nashMajor : nashMinor;
+
+  return notes.map((n, idx) => {
+    const q = qualities[idx];
+    const name = q === "dim" ? `${n} dim` : `${n}${q ? " " + (q==="m" ? "Minor" : q) : " Major"}`;
+    return { name, nash: nash[idx] };
+  });
+}
+
+function buildPracticeList(){
+  const display = settings.practice.displayType;
+  const root = settings.practice.scaleRoot;
+  const type = settings.practice.scaleType;
+
+  const order = settings.practice.orderMode;
+  if(order === "Custom"){
+    const raw = (settings.practice.customList || "").trim();
+    const list = raw.split(",").map(s=>s.trim()).filter(Boolean);
+    return list.length ? list : ["C Major","G Major","A Minor","F Major"];
+  }
+
+  const triads = getDiatonicTriads(root, type);
+  return (display === "Nashville Number") ? triads.map(t=>t.nash) : triads.map(t=>t.name);
+}
+
+function updateChordLabel(){
+  const label = document.querySelector(".chord-label");
+  if(!label) return;
+  label.textContent = (settings.practice.displayType === "Nashville Number") ? "Current Number" : "Current Chord";
+}
+
+function setCurrentPracticeText(text){
+  updateChordLabel();
+  document.getElementById("chordName").textContent = text;
+  speakIfNeeded(text);
+}
+
+function speakIfNeeded(text){
+  if(!settings.practice.noteSpeakEnabled) return;
+  if(settings.practice.practiceMode !== "Speak note/number") return;
+  if(!("speechSynthesis" in window)) return;
+
   try{
-    const raw = localStorage.getItem(STATS_KEY);
-    if(!raw) return structuredClone(STATS_DEFAULT);
-    const obj = JSON.parse(raw);
-    return {
-      totalPracticeMs: Number(obj.totalPracticeMs)||0,
-      bestQuizSessionMs: Number(obj.bestQuizSessionMs)||0,
-      quizHighScore: Number(obj.quizHighScore)||0,
-      bpmCounts: (obj.bpmCounts && typeof obj.bpmCounts === "object") ? obj.bpmCounts : {}
-    };
-  }catch(e){
-    return structuredClone(STATS_DEFAULT);
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    u.volume = 1.0;
+    window.speechSynthesis.speak(u);
+  }catch{}
+}
+
+
+function updateScalePill(){
+  const pill = document.getElementById('scalePill');
+  if(!pill) return;
+  pill.textContent = `${settings.practice.scaleRoot} ${settings.practice.scaleType}`;
+}
+
+function refreshPractice(){
+  practiceList = buildPracticeList();
+  practicePos = 0;
+  practiceDir = 1;
+  updateScalePill();
+  setCurrentPracticeText(practiceList[0] || "C Major");
+}
+
+/* ===== Switch rule logic ===== */
+function ruleBeats(rule){
+  switch(rule){
+    case "Every beat": return "ALL";
+    case "Every 1st beat": return [1];
+    case "Every 2nd beat": return [2];
+    case "1st and 3rd beat": return [1,3];
+    case "1st and 4th beat": return [1,4];
+    case "4th beat": return [4];
+    default: return "ALL";
+  }
+}
+function shouldSwitchOnBeat(beatNum){
+  const r = ruleBeats(settings.practice.switchRule);
+  if(r === "ALL") return true;
+  return r.includes(beatNum);
+}
+
+/* ===== Order logic ===== */
+function nextIndex(len){
+  const order = settings.practice.orderMode;
+  if(len <= 0) return 0;
+
+  if(order === "Random"){
+    return Math.floor(Math.random() * len);
+  }
+  if(order === "Ascending"){
+    return (practicePos + 1) % len;
+  }
+  if(order === "Ascending and descending"){
+    let next = practicePos + practiceDir;
+    if(next >= len){
+      practiceDir = -1;
+      next = (len - 2 >= 0) ? (len - 2) : 0;
+    } else if(next < 0){
+      practiceDir = 1;
+      next = (len > 1) ? 1 : 0;
+    }
+    return next;
+  }
+  return (practicePos + 1) % len;
+}
+
+/* ===== Metronome visuals ===== */
+function updateMetronomeVisual(containerId) {
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  container.innerHTML = '';
+  for (let i = 0; i < beatsPerMeasure; i++) {
+    const beat = document.createElement('div');
+    beat.className = 'beat-indicator';
+    beat.id = `${containerId}-beat-${i}`;
+    container.appendChild(beat);
   }
 }
 
-const STATS = loadStats();
+function updateBeatIndicators() {
+  for (let i = 0; i < beatsPerMeasure; i++) {
+    const beat1 = document.getElementById(`metronomeVisual-beat-${i}`);
+    const beat2 = document.getElementById(`metronomeVisual2-beat-${i}`);
 
-// Debounced save = less localStorage writes = better performance
-let _saveTimer = null;
-function saveStats(){
-  if(_saveTimer) return;
-  _saveTimer = setTimeout(() => {
-    _saveTimer = null;
-    try{ localStorage.setItem(STATS_KEY, JSON.stringify(STATS)); }catch(e){}
-  }, 250);
-}
+    const active = (i === beatIndex) && isPlaying && settings.practice.metronomeEnabled;
+    const accent = (i === 0) && settings.metronome.accentEnabled;
 
-// Find the most-used BPM from bpmCounts
-function computeTopBpm(){
-  const entries = Object.entries(STATS.bpmCounts);
-  if(!entries.length) return null;
-  entries.sort((a,b)=> (Number(b[1])||0) - (Number(a[1])||0));
-  const [bpm, count] = entries[0];
-  return count ? Number(bpm) : null;
-}
-
-// Paint score UI
-function updateScoreUI(){
-  $("statTotalTime").textContent = formatDuration(STATS.totalPracticeMs);
-  $("statBestQuizTime").textContent = formatDuration(STATS.bestQuizSessionMs);
-  $("statHighScore").textContent = String(STATS.quizHighScore);
-  const top = computeTopBpm();
-  $("statTopBpm").textContent = top ? (top + " BPM") : "—";
-}
-updateScoreUI();
-
-// Session tracking variables
-let practiceSessionStart = null;
-let quizSessionStart = null;
-let currentQuizScore = 0;
-
-// start practice timer
-function startPracticeSession(){
-  if(practiceSessionStart) return;
-  practiceSessionStart = nowMs();
-}
-
-// stop practice timer and add to total
-function stopPracticeSession(){
-  if(!practiceSessionStart) return;
-  const dur = nowMs() - practiceSessionStart;
-  practiceSessionStart = null;
-
-  STATS.totalPracticeMs += Math.max(0, dur);
-  saveStats();
-  updateScoreUI();
-}
-
-// start quiz time + reset streak
-function startQuizSession(){
-  if(quizSessionStart) return;
-  quizSessionStart = nowMs();
-  currentQuizScore = 0;
-}
-
-// stop quiz time + update best time and high score
-function stopQuizSession(){
-  if(!quizSessionStart) return;
-  const dur = nowMs() - quizSessionStart;
-  quizSessionStart = null;
-
-  if(dur > STATS.bestQuizSessionMs) STATS.bestQuizSessionMs = dur;
-  if(currentQuizScore > STATS.quizHighScore) STATS.quizHighScore = currentQuizScore;
-
-  saveStats();
-  updateScoreUI();
-}
-
-
-/* =====================================================================
-   Share Achievements (Web Share API + fallback)
-   ===================================================================== */
-function achievementsText(){
-  const topBpm = computeTopBpm();
-  return [
-    "🎵 Instrument Trainer – My Achievements",
-    `• Total practice time: ${formatDuration(STATS.totalPracticeMs)}`,
-    `• Best continuous quiz time: ${formatDuration(STATS.bestQuizSessionMs)}`,
-    `• Highest quiz score: ${STATS.quizHighScore}`,
-    `• Most practiced metronome BPM: ${topBpm ? (topBpm + " BPM") : "—"}`
-  ].join("\n");
-}
-
-async function shareAchievements(){
-  const text = achievementsText();
-
-  // If native share is available (mobile), use it
-  if(navigator.share){
-    try{ await navigator.share({ title: "My Achievements", text }); return; }catch(e){}
+    if (beat1) {
+      beat1.classList.toggle('active', active);
+      beat1.classList.toggle('accent', active && accent);
+    }
+    if (beat2) {
+      beat2.classList.toggle('active', active);
+      beat2.classList.toggle('accent', active && accent);
+    }
   }
-
-  // Otherwise show the share box
-  $("shareText").textContent = text;
-  $("shareBox").style.display = "grid";
 }
 
-$("shareBtn").addEventListener("click", shareAchievements);
-$("closeShare").addEventListener("click", () => $("shareBox").style.display = "none");
-
-$("copyShare").addEventListener("click", async () => {
-  const text = achievementsText();
-  try{
-    await navigator.clipboard.writeText(text);
-    $("copyShare").textContent = "Copied!";
-    setTimeout(() => ($("copyShare").textContent = "Copy"), 900);
-  }catch(e){
-    $("shareText").textContent = text + "\n\n(Select and copy manually)";
-  }
-});
-
-
-/* =====================================================================
-   5) METRONOME (WebAudio Scheduler)
-   =====================================================================
-
-   WHY lookahead scheduling?
-   - setTimeout/setInterval can drift due to UI load, tab throttling, etc.
-   - WebAudio scheduling lets us schedule clicks slightly in advance for
-     stable timing.
-
-   HOW it works:
-   - schedulerLoop runs every ~25ms
-   - it schedules audio clicks up to scheduleAheadSec (~120ms) ahead
-   - "nextNoteTime" tracks when the next click should happen in the audio timeline
-*/
-
-// Metronome state (everything the metronome needs)
-const METRONOME = {
-  bpm: DEFAULT_RAMP.start,
-  running: false,
-  beatsPerBar: 4,
-  beat: 1,
-  subDiv: 1,
-  subTick: 0,
-
-  clickMuted: false,  // training tile toggle controls this
-  accentOn: true,
-  volume: 0.60,
-
-  rangeMin: 30,
-  rangeMax: 260,
-
-  // ramp settings
-  rampEnabled: false,
-  rampMode: DEFAULT_RAMP.mode, // "time" or "beats"
-  rampStartBpm: DEFAULT_RAMP.start,
-  rampEndBpm: DEFAULT_RAMP.end,
-  rampStep: DEFAULT_RAMP.step,
-  rampTimeSec: DEFAULT_RAMP.timeSec,
-  rampBeats: DEFAULT_RAMP.beats,
-
-  rampNextStepT: 0,        // used for time mode
-  rampBeatStepCounter: 0,  // used for beats mode
-
-  subscribers: []           // trainer listens here for beat events
-};
-
-// WebAudio context for metronome clicks
+/* ===== Audio click ===== */
 let audioCtx = null;
+
 function ensureAudio(){
-  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return audioCtx;
-}
-
-// Simple click generator (square wave + short envelope)
-function playClick(freq, gainLevel, ms){
-  const ctx = ensureAudio();
-  if(ctx.state === "suspended") ctx.resume();
-
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = "square";
-  osc.frequency.value = freq;
-
-  const t = ctx.currentTime;
-  gain.gain.setValueAtTime(0.0001, t);
-  gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, gainLevel), t + 0.005);
-  gain.gain.exponentialRampToValueAtTime(0.0001, t + ms/1000);
-
-  osc.connect(gain).connect(ctx.destination);
-  osc.start(t);
-  osc.stop(t + ms/1000 + 0.02);
-}
-
-// Scheduler settings (tune these if you want)
-const SCHED = {
-  lookaheadMs: 25,         // how often the scheduler runs
-  scheduleAheadSec: 0.12,  // how far ahead we schedule
-  timerId: null,
-  nextNoteTime: 0
-};
-
-// Apply global BPM clamps
-function clampBpm(v){
-  const x = Math.round(Number(v)||1);
-  const withinHard = clamp(x, BPM_MIN_HARD, BPM_MAX_HARD);
-  // also respect rangeMin/rangeMax (user range)
-  return clamp(withinHard, METRONOME.rangeMin, METRONOME.rangeMax);
-}
-
-// How long each metronome tick should be in seconds
-function secondsPerSubTick(){
-  const bpm = clampBpm(METRONOME.bpm);
-  const beatSec = 60 / bpm;
-  return beatSec / Math.max(1, METRONOME.subDiv);
-}
-
-/* Ramp logic
-   - If ramp is enabled, BPM moves from rampStartBpm -> rampEndBpm
-   - step size = rampStep
-   - mode = time (every rampTimeSec) OR beats (every rampBeats beats)
-*/
-function applyRampIfNeeded(){
-  if(!METRONOME.rampEnabled) return;
-
-  const start = clampBpm(METRONOME.rampStartBpm);
-  const end   = clampBpm(METRONOME.rampEndBpm);
-
-  const dir = (end >= start) ? 1 : -1; // ramp direction
-  const stepAbs = Math.max(1, Number(METRONOME.rampStep) || 1);
-  const step = stepAbs * dir;
-
-  // If we reached end, stop ramp automatically
-  const atEnd = (dir === 1) ? (METRONOME.bpm >= end) : (METRONOME.bpm <= end);
-  if(atEnd){
-    METRONOME.bpm = end;
-    METRONOME.rampEnabled = false;
-    return;
-  }
-
-  // TIME mode: step occurs when current time exceeds rampNextStepT
-  if(METRONOME.rampMode === "time"){
-    const now = nowMs();
-    if(now < METRONOME.rampNextStepT) return;
-
-    let next = clampBpm(METRONOME.bpm + step);
-    next = (dir === 1) ? Math.min(next, end) : Math.max(next, end);
-
-    METRONOME.bpm = next;
-    METRONOME.rampNextStepT = now + (Math.max(1, METRONOME.rampTimeSec) * 1000);
-    return;
-  }
-
-  // BEATS mode: step occurs after N completed beats
-  if(METRONOME.rampBeatStepCounter >= Math.max(1, METRONOME.rampBeats)){
-    let next = clampBpm(METRONOME.bpm + step);
-    next = (dir === 1) ? Math.min(next, end) : Math.max(next, end);
-
-    METRONOME.bpm = next;
-    METRONOME.rampBeatStepCounter = 0;
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
 }
 
-// Subscribers get a payload each tick
-function notifySubscribers(){
-  const payload = {
-    bpm: METRONOME.bpm,
-    running: METRONOME.running,
-    beatsPerBar: METRONOME.beatsPerBar,
-    beat: METRONOME.beat,
-    subDiv: METRONOME.subDiv,
-    subTick: METRONOME.subTick
-  };
-  for(const fn of METRONOME.subscribers) fn(payload);
+function toneToFreq(tone, accent){
+  const base = {
+    "Classic Click": 900,
+    "Wood Block": 650,
+    "Digital Beep": 1100,
+    "Cowbell": 760,
+    "Hi-Hat": 1200,
+    "Snare": 520,
+    "Soft Click": 780
+  }[tone] || 900;
+  return accent ? base * 1.15 : base;
 }
 
-// Schedules one tick at an audio timeline time
-function scheduleOneTick(){
-  // Sound generation (if not muted)
-  if(!METRONOME.clickMuted){
-    const vol = METRONOME.volume;
-    const isDownBeat = (METRONOME.beat === 1 && METRONOME.subTick === 0);
-    const isBeatTick = (METRONOME.subTick === 0);
-
-    // Loudness + frequency shaping
-    const baseGain = isBeatTick ? (0.12 + vol * 0.28) : (0.06 + vol * 0.16);
-    const gain = (isDownBeat && METRONOME.accentOn) ? (0.18 + vol * 0.35) : baseGain;
-
-    const freq = isDownBeat ? 1200 : (isBeatTick ? 900 : 750);
-    playClick(freq, gain, isBeatTick ? 55 : 35);
-  }
-
-  // Record BPM usage for stats on beat-start
-  if(METRONOME.subTick === 0){
-    const k = String(clampBpm(METRONOME.bpm));
-    STATS.bpmCounts[k] = (Number(STATS.bpmCounts[k])||0) + 1;
-  }
-
-  // Notify listeners (trainer uses this)
-  notifySubscribers();
-
-  // Advance subdivision and beat counters
-  METRONOME.subTick = (METRONOME.subTick + 1) % METRONOME.subDiv;
-
-  if(METRONOME.subTick === 0){
-    METRONOME.beat = (METRONOME.beat % METRONOME.beatsPerBar) + 1;
-
-    // If ramp is beats mode, count beats
-    if(METRONOME.rampEnabled && METRONOME.rampMode === "beats"){
-      METRONOME.rampBeatStepCounter += 1;
-    }
-  }
-
-  // Apply ramp changes after movement
-  applyRampIfNeeded();
-}
-
-// UI refresh throttling (avoid updating DOM on every tick)
-let _lastUiPaint = 0;
-function updateMetronomeConfigUI(force=false){
-  const t = nowMs();
-  if(!force && (t - _lastUiPaint) < 80) return; // ~12 fps UI updates
-  _lastUiPaint = t;
-
-  $("tsChip").textContent = `${METRONOME.beatsPerBar}/4`;
-  $("cfgTS").textContent = `${METRONOME.beatsPerBar}/4`;
-  $("cfgSub").textContent = String(METRONOME.subDiv);
-  $("cfgRange").textContent = `${METRONOME.rangeMin}–${METRONOME.rangeMax}`;
-  $("cfgRamp").textContent = METRONOME.rampEnabled ? "On" : "Off";
-
-  $("bpmBig").textContent = String(clampBpm(METRONOME.bpm));
-  $("bpmEdit").value = String(clampBpm(METRONOME.bpm));
-
-  $("mStartStop").textContent = METRONOME.running ? "Stop" : "Start";
-  $("mStartStop").classList.toggle("running", METRONOME.running);
-
-  $("rampArm").textContent = `Ramp: ${METRONOME.rampEnabled ? "On" : "Off"}`;
-  $("mAccent").textContent = `Accent: ${METRONOME.accentOn ? "On" : "Off"}`;
-
-  // Beat indicator UI
-  if(METRONOME.running){
-    setActiveBeat($("metroBeats"), METRONOME.beat);
-    if($("practiceType").value !== "quiz") setActiveBeat($("trainingBeats"), METRONOME.beat);
-    else setActiveBeat($("trainingBeats"), 1);
-  }else{
-    setActiveBeat($("metroBeats"), 1);
-    setActiveBeat($("trainingBeats"), 1);
-  }
-
-  saveStats();
-  updateScoreUI();
-}
-
-// Main scheduler loop
-function schedulerLoop(){
-  if(!METRONOME.running) return;
-
-  const ctx = ensureAudio();
-  const currentTime = ctx.currentTime;
-
-  // Schedule ticks ahead
-  while(SCHED.nextNoteTime < currentTime + SCHED.scheduleAheadSec){
-    scheduleOneTick();
-    SCHED.nextNoteTime += secondsPerSubTick();
-  }
-
-  updateMetronomeConfigUI(false);
-  SCHED.timerId = setTimeout(schedulerLoop, SCHED.lookaheadMs);
-}
-
-// Start metronome
-function startMetronome(){
+function playClick(accent){
+  if(!settings.practice.metronomeEnabled) return;
   ensureAudio();
-  if(audioCtx.state === "suspended") audioCtx.resume();
 
-  if(SCHED.timerId) clearTimeout(SCHED.timerId);
+  const t = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
 
-  METRONOME.running = true;
-  METRONOME.beat = 1;
-  METRONOME.subTick = 0;
+  o.type = "square";
+  o.frequency.value = toneToFreq('Classic Click', accent);
 
-  // initialize ramp counters when starting
-  if(METRONOME.rampEnabled && METRONOME.rampMode === "time"){
-    METRONOME.rampNextStepT = nowMs() + (Math.max(1, METRONOME.rampTimeSec) * 1000);
-  }
-  METRONOME.rampBeatStepCounter = 0;
+  const vol = Math.max(0, Math.min(1, volume / 100));
+  const peak = (accent ? 0.20 : 0.13) * vol;
 
-  SCHED.nextNoteTime = audioCtx.currentTime + 0.02;
-  schedulerLoop();
-  updateMetronomeConfigUI(true);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t + 0.002);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(t); o.stop(t + 0.06);
 }
 
-// Stop metronome
-function stopMetronome(){
-  METRONOME.running = false;
-  if(SCHED.timerId){ clearTimeout(SCHED.timerId); SCHED.timerId = null; }
-  METRONOME.beat = 1;
-  METRONOME.subTick = 0;
-  notifySubscribers();
-  updateMetronomeConfigUI(true);
-}
-
-// Tap tempo (average of last taps)
-let tapTimes = [];
-function tapTempo(){
-  const t = nowMs();
-  tapTimes.push(t);
-  tapTimes = tapTimes.slice(-6);
-
-  if(tapTimes.length < 2) return;
-
-  const intervals = [];
-  for(let i=1;i<tapTimes.length;i++){
-    intervals.push(tapTimes[i] - tapTimes[i-1]);
-  }
-
-  const avgMs = intervals.reduce((a,b)=>a+b,0) / intervals.length;
-  METRONOME.bpm = clampBpm(60000 / avgMs);
-  updateMetronomeConfigUI(true);
-}
-
-
-/* =====================================================================
-   Beat dots rendering (used in training + metronome)
-   ===================================================================== */
-function renderBeatDots(container, beatsPerBar){
-  container.innerHTML = "";
-  const safe = clamp(beatsPerBar, 1, 12);
-  for(let i=1;i<=safe;i++){
-    const d=document.createElement("div");
-    d.className = "beatDot" + (i===1 ? " accent" : "");
-    d.dataset.beat = String(i);
-    container.appendChild(d);
+/* ===== Timing ===== */
+function subdivisionFactor(){
+  switch(subdivision){
+    case "Eighth": return 2;
+    case "Triplet": return 3;
+    case "Sixteenth": return 4;
+    default: return 1; // Quarter
   }
 }
 
-function setActiveBeat(container, beat){
-  const dots=[...container.querySelectorAll(".beatDot")];
-  for(const d of dots) d.classList.remove("active");
-  const active = dots.find(d => Number(d.dataset.beat) === beat);
-  if(active) active.classList.add("active");
+function msPerSubBeat(){
+    const beatMs = (60 / effectiveBpm()) * 1000;
+  return beatMs / subdivisionFactor();
 }
 
-function rebuildBeatDots(){
-  renderBeatDots($("trainingBeats"), METRONOME.beatsPerBar);
-  renderBeatDots($("metroBeats"), METRONOME.beatsPerBar);
-}
-rebuildBeatDots();
+/* ===== Engine ===== */
+function startEngine(){
+  if(isPlaying) return;
+
+  ensureAudio();
+  isPlaying = true;
+  beatIndex = 0;
 
 
-/* =====================================================================
-   Metronome UI wiring (buttons/inputs)
-   ===================================================================== */
-
-// Start/Stop metronome tile button
-$("mStartStop").addEventListener("click", () => {
-  METRONOME.running ? stopMetronome() : startMetronome();
-});
-
-// Volume slider
-$("mVol").addEventListener("input", (e) => {
-  METRONOME.volume = clamp(Number(e.target.value)||0, 0, 100)/100;
-});
-
-// BPM +/- buttons
-$("bpmUp").addEventListener("click", () => { METRONOME.bpm = clampBpm(METRONOME.bpm + 1); updateMetronomeConfigUI(true); });
-$("bpmDown").addEventListener("click", () => { METRONOME.bpm = clampBpm(METRONOME.bpm - 1); updateMetronomeConfigUI(true); });
-
-// Click-to-edit BPM (swap display text into input)
-$("bpmBig").addEventListener("click", () => {
-  $("bpmBig").style.display = "none";
-  $("bpmEdit").style.display = "inline-block";
-  $("bpmEdit").focus();
-  $("bpmEdit").select();
-});
-$("bpmEdit").addEventListener("blur", () => {
-  METRONOME.bpm = clampBpm($("bpmEdit").value);
-  $("bpmEdit").style.display = "none";
-  $("bpmBig").style.display = "block";
-  updateMetronomeConfigUI(true);
-});
-$("bpmEdit").addEventListener("keydown", (e) => {
-  if(e.key === "Enter") $("bpmEdit").blur();
-  if(e.key === "Escape"){
-    $("bpmEdit").value = String(clampBpm(METRONOME.bpm));
-    $("bpmEdit").blur();
+  // Ramp baseline
+  if(settings.metronome.rampEnabled){
+    bpm = Math.max(40, Math.min(240, settings.metronome.rampStartBPM));
   }
-});
+  rampCurrentBpm = bpm;
+  resetRampRuntime();
+  updateBpmMini();
+  const button = document.getElementById('startStopButton');
+  const buttonText = document.getElementById('buttonText');
+  const playIcon = document.getElementById('playIcon');
+  const pauseIcon = document.getElementById('pauseIcon');
 
-// Gear settings popover open/close
-$("gearBtn").addEventListener("click", () => {
-  const open = $("metroSettings").style.display === "grid";
-  $("metroSettings").style.display = open ? "none" : "grid";
-});
-$("closeSettings").addEventListener("click", () => $("metroSettings").style.display = "none");
+  button.classList.add('playing');
+  buttonText.textContent = 'Stop';
+  playIcon.style.display = 'none';
+  pauseIcon.style.display = 'block';
 
-// Time signature changes beatsPerBar (we only use top number for beat count)
-$("timeSig").addEventListener("change", (e) => {
-  const [top] = String(e.target.value).split("/");
-  METRONOME.beatsPerBar = clamp(Number(top)||4, 1, 12);
-  METRONOME.beat = 1; METRONOME.subTick = 0;
-  rebuildBeatDots();
-  updateMetronomeConfigUI(true);
-});
-
-// Subdivision (1..4) changes ticks per beat
-$("subdivision").addEventListener("change", (e) => {
-  METRONOME.subDiv = clamp(Number(e.target.value)||1, 1, 4);
-  METRONOME.subTick = 0;
-  updateMetronomeConfigUI(true);
-});
-
-// BPM range min/max (also clamps current bpm)
-function syncRange(){
-  METRONOME.rangeMin = clamp(Number($("rangeMin").value)||30, BPM_MIN_HARD, BPM_MAX_HARD-1);
-  METRONOME.rangeMax = clamp(Number($("rangeMax").value)||260, METRONOME.rangeMin+1, BPM_MAX_HARD);
-  METRONOME.bpm = clampBpm(METRONOME.bpm);
-  updateMetronomeConfigUI(true);
+  refreshPractice();
+  tickFromPos(0);
 }
-$("rangeMin").addEventListener("change", syncRange);
-$("rangeMax").addEventListener("change", syncRange);
 
-// Ramp input sync + mode field swap
-function syncRampInputsToState(){
-  METRONOME.rampStartBpm = clampBpm($("rampStart").value);
-  METRONOME.rampEndBpm   = clampBpm($("rampEnd").value);
-  METRONOME.rampStep     = Math.max(1, Number($("rampStep").value)||1);
+function stopEngine(){
+  isPlaying = false;
 
-  METRONOME.rampMode     = $("rampMode").value === "beats" ? "beats" : "time";
-  METRONOME.rampTimeSec  = Math.max(1, Number($("rampTime").value)||2);
-  METRONOME.rampBeats    = Math.max(1, Number($("rampBeats").value)||4);
+  const button = document.getElementById('startStopButton');
+  const buttonText = document.getElementById('buttonText');
+  const playIcon = document.getElementById('playIcon');
+  const pauseIcon = document.getElementById('pauseIcon');
 
-  // Show relevant interval field
-  if(METRONOME.rampMode === "time"){
-    $("rampTimeField").style.display = "grid";
-    $("rampBeatsField").style.display = "none";
+  button.classList.remove('playing');
+  buttonText.textContent = 'Start';
+  playIcon.style.display = 'block';
+  pauseIcon.style.display = 'none';
+
+  if(beatTimer){
+    clearTimeout(beatTimer);
+    beatTimer = null;
+  }
+  beatIndex = 0;
+  updateBeatIndicators();
+
+  try{ window.speechSynthesis.cancel(); }catch{}
+}
+
+function restartEngine(){
+  if(!isPlaying) return;
+  stopEngine();
+  setTimeout(()=>startEngine(), 20);
+}
+
+function tickFromPos(pos){
+  if(!isPlaying) return;
+
+  const sub = subdivisionFactor();
+  const totalSubBeats = beatsPerMeasure * sub;
+
+  pos = ((pos % totalSubBeats) + totalSubBeats) % totalSubBeats;
+  const beatInMeasure = Math.floor(pos / sub);
+  const subBeat = pos % sub;
+  const beatNum = beatInMeasure + 1;
+  const isMainBeat = (subBeat === 0);
+
+  if(isMainBeat){
+    const isAccent = settings.metronome.accentEnabled && (beatNum === 1);
+    rampTick();
+    updateBpmMini();
+    updateRampMiniUI();
+    playClick(isAccent);
+    beatIndex = beatInMeasure;
+    updateBeatIndicators();
+
+    if(shouldSwitchOnBeat(beatNum)){
+      const next = nextIndex(practiceList.length);
+      practicePos = next;
+      setCurrentPracticeText(practiceList[practicePos] || "C Major");
+    }
+  } else {
+    playClick(false);
+  }
+
+  const nextPos = (pos + 1) % totalSubBeats;
+  beatTimer = setTimeout(()=>tickFromPos(nextPos), msPerSubBeat());
+}
+
+/* ===== Start/Stop button ===== */
+function togglePlay() {
+  if(isPlaying) stopEngine();
+  else startEngine();
+}
+
+/* ===== Page 2 controls ===== */
+function changeBPM(delta) {
+  bpm = Math.max(40, Math.min(240, bpm + delta));
+  document.getElementById('bpmValue').textContent = bpm;
+  if (isPlaying) restartEngine();
+  updateBpmMini();
+  updateRampMiniUI();
+}
+
+function enableBPMEdit() {
+  const display = document.getElementById('bpmDisplay');
+  const currentBPM = bpm;
+  display.innerHTML = `<input type="number" class="bpm-input" id="bpmInput" value="${currentBPM}" min="40" max="240" onblur="saveBPM()" onkeydown="handleBPMKeydown(event)">`;
+  document.getElementById('bpmInput').focus();
+  document.getElementById('bpmInput').select();
+}
+
+function saveBPM() {
+  const input = document.getElementById('bpmInput');
+  const newBPM = parseInt(input.value);
+  if (!isNaN(newBPM) && newBPM >= 40 && newBPM <= 240) bpm = newBPM;
+
+  const display = document.getElementById('bpmDisplay');
+  display.innerHTML = `
+    <div class="bpm-value" id="bpmValue">${bpm}</div>
+    <div class="bpm-label">BPM</div>
+  `;
+
+  if (isPlaying) restartEngine();
+  updateBpmMini();
+  updateRampMiniUI();
+}
+
+function handleBPMKeydown(event) {
+  if (event.key === 'Enter') saveBPM();
+}
+
+function updateVolume(value) {
+  volume = Number(value);
+  document.getElementById('volumeValue').textContent = `${value}%`;
+}
+
+/* ===== Time signature + subdivision ===== */
+function updateTimeSignature() {
+  const timeSig = document.getElementById('timeSignature').value;
+  beatsPerMeasure = parseInt(timeSig.split('/')[0]);
+  updateMetronomeVisual('metronomeVisual');
+  updateMetronomeVisual('metronomeVisual2');
+  updateBeatIndicators();
+  if (isPlaying) restartEngine();
+}
+
+function bindSubdivision(){
+  const el = document.getElementById("subdivision");
+  if(!el) return;
+  el.addEventListener("change", ()=>{
+    subdivision = el.value; // Quarter/Eighth/Triplet/Sixteenth
+    if(isPlaying) restartEngine();
+  });
+}
+
+/* ===== Ramp wiring (UI only for now) ===== */
+function resetRamp() {
+  const startBPM = parseInt(document.getElementById('rampStartBPM').value);
+  if (!isNaN(startBPM)) {
+    bpm = Math.max(40, Math.min(240, startBPM));
+    const bpmValue = document.getElementById('bpmValue');
+    if(bpmValue) bpmValue.textContent = bpm;
+    if(isPlaying) restartEngine();
+    updateBpmMini();
+    updateRampMiniUI();
+  }
+}
+
+function saveRampSettings(){
+  const s = parseInt(document.getElementById('rampStartBPM')?.value || settings.metronome.rampStartBPM, 10);
+  const e = parseInt(document.getElementById('rampEndBPM')?.value || settings.metronome.rampEndBPM, 10);
+  const step = parseInt(document.getElementById('rampStepBPM')?.value || settings.metronome.rampStepBPM, 10);
+  const secs = parseInt(document.getElementById('rampStepTime')?.value || settings.metronome.rampStepTime, 10);
+
+  settings.metronome.rampStartBPM = Math.max(40, Math.min(240, isNaN(s) ? 60 : s));
+  settings.metronome.rampEndBPM   = Math.max(40, Math.min(240, isNaN(e) ? 140 : e));
+  settings.metronome.rampStepBPM  = Math.max(1,  Math.min(40,  isNaN(step) ? 5 : step));
+  settings.metronome.rampStepTime = Math.max(1,  Math.min(600, isNaN(secs) ? 30 : secs));
+
+  if(settings.metronome.rampEndBPM < settings.metronome.rampStartBPM){
+    const tmp = settings.metronome.rampStartBPM;
+    settings.metronome.rampStartBPM = settings.metronome.rampEndBPM;
+    settings.metronome.rampEndBPM = tmp;
+  }
+
+  // Apply immediately
+  if(settings.metronome.rampEnabled){
+    bpm = settings.metronome.rampStartBPM;
+  }
+  rampCurrentBpm = bpm;
+  resetRampRuntime();
+  updateBpmMini();
+  updateRampMiniUI();
+
+  if(isPlaying) restartEngine();
+}
+
+function saveRampAndStartPractice(){
+  // Make sure ramp is ON
+  settings.metronome.rampEnabled = true;
+
+  // Sync the ramp toggle UI to ON
+  const rampToggle = document.getElementById('rampToggle');
+  if(rampToggle) rampToggle.classList.add('active');
+
+  // Ensure ramp inputs visible (since user is saving)
+  const rampInputs = document.getElementById('rampInputs');
+  if(rampInputs) rampInputs.style.display = 'block';
+
+  // Save parameters from inputs and apply (this also restarts if playing)
+  saveRampSettings();
+
+  // Go to Practice page and start
+  try{ goToPage(0); }catch{}
+
+  if(isPlaying){
+    // ensure running with new ramp settings
+    restartEngine();
   }else{
-    $("rampTimeField").style.display = "none";
-    $("rampBeatsField").style.display = "grid";
+    startEngine();
+  }
+}
+
+
+
+/* ===== Practice UI bindings ===== */
+function bindPracticeInputs(){
+  const byId = (id)=>document.getElementById(id);
+
+  const instrument = byId("instrument");
+  const scaleRoot = byId("scaleRoot");
+  const scaleType = byId("scaleType");
+  const displayType = byId("displayType");
+  const switchRule = byId("switchRule");
+  const practiceMode = byId("practiceMode");
+  const orderMode = byId("orderMode");
+  const customList = byId("customList");
+  const customGroup = byId("customListGroup");
+  function syncToSettings(){
+    settings.practice.instrument = instrument.value;
+    settings.practice.scaleRoot = scaleRoot.value;
+    settings.practice.scaleType = scaleType.value;
+    settings.practice.displayType = displayType.value;
+
+    updateScalePill();
+    settings.practice.switchRule = switchRule.value;
+    settings.practice.practiceMode = practiceMode.value;
+    settings.practice.orderMode = orderMode.value;
+    settings.practice.customList = customList.value;  updateScalePill();
+
+    customGroup.style.display = (settings.practice.orderMode === "Custom") ? "block" : "none";
+
+    refreshPractice();
+    if(isPlaying) restartEngine();
   }
 
-  updateMetronomeConfigUI(true);
-}
-["rampStart","rampEnd","rampStep","rampMode","rampTime","rampBeats"].forEach(id => {
-  $(id).addEventListener("change", syncRampInputsToState);
-});
-syncRampInputsToState();
-
-// Ramp on/off (when ON: set bpm to start for predictable ramp behavior)
-$("rampArm").addEventListener("click", () => {
-  syncRampInputsToState();
-  METRONOME.rampEnabled = !METRONOME.rampEnabled;
-
-  if(METRONOME.rampEnabled){
-    METRONOME.bpm = clampBpm(METRONOME.rampStartBpm);
-    METRONOME.rampBeatStepCounter = 0;
-    if(METRONOME.rampMode === "time"){
-      METRONOME.rampNextStepT = nowMs() + (Math.max(1, METRONOME.rampTimeSec) * 1000);
-    }
-  }
-  updateMetronomeConfigUI(true);
-});
-
-// Ramp reset sets bpm back to start (keeps ramp state)
-$("rampReset").addEventListener("click", () => {
-  syncRampInputsToState();
-  METRONOME.bpm = clampBpm(METRONOME.rampStartBpm);
-  METRONOME.rampBeatStepCounter = 0;
-  if(METRONOME.rampMode === "time"){
-    METRONOME.rampNextStepT = nowMs() + (Math.max(1, METRONOME.rampTimeSec) * 1000);
-  }
-  updateMetronomeConfigUI(true);
-});
-
-// Tap tempo + accent toggle
-$("mTap").addEventListener("click", tapTempo);
-$("mAccent").addEventListener("click", () => {
-  METRONOME.accentOn = !METRONOME.accentOn;
-  updateMetronomeConfigUI(true);
-});
-
-
-/* =====================================================================
-   6) TRAINER (Scale + display logic)
-   ===================================================================== */
-
-// =====================================================================
-// NOTE/NUMBER FORMULA (Instrument-aware)
-// ---------------------------------------------------------------------
-// Your app has 2 concepts:
-//
-// 1) "NOTES"  -> the actual note name shown on the big tile
-// 2) "NUMBER" -> the Nashville degree (1..7) shown on the big tile
-//
-// Previously, ALL instruments used the same diatonic math (CHROMATIC + STEPS).
-// Now we support instrument-specific key maps.
-// - Bass Guitar uses your explicit 7-note key lists for MAJOR.
-// - For any instrument/key/type not defined in a map, we safely fall back
-//   to the original diatonic builder (CHROMATIC + MAJOR/MINOR steps).
-//
-// IMPORTANT:
-// - Your UI offers MAJOR and NATURAL MINOR. Bass currently has explicit MAJOR
-//   maps only (you can add minor maps later). If Bass+Minor is selected,
-//   we fall back to the diatonic natural minor formula.
-// =====================================================================
-
-// Normalize note strings so the app can accept "c" or "C" consistently.
-function normalizeNoteName(n){
-  const s = String(n || "").trim();
-  if(!s) return s;
-  // Keep sharps as "#", force first letter to uppercase.
-  return s.length === 1 ? s.toUpperCase() : (s[0].toUpperCase() + s.slice(1));
-}
-
-// ---------------------------------------------------------------------
-// Two separate chromatic spellings:
-// - CHROMATIC_NOTES: used for NOTE practice + MIDI pitch mapping (sharp spelling)
-// - CHROMATIC_CHORDS: used for CHORD labels (flat spelling by default)
-//   (So you can display chords as Db / Eb / Gb / Ab / Bb instead of C# / D# / F# / G# / A#)
-// ---------------------------------------------------------------------
-
-// Used for NOTE lists and pitch math
-const CHROMATIC_NOTES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
-
-// Used for CHORD labels (you can edit this list to your preferred spelling)
-const CHROMATIC_CHORDS = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
-
-// Steps for major / natural minor scales (in semitones)
-const MAJOR_STEPS = [0,2,4,5,7,9,11];
-const MINOR_STEPS = [0,2,3,5,7,8,10];
-
-// Enharmonic mapping to match CHROMATIC_CHORDS roots when the user selects sharps
-const SHARP_TO_FLAT = {
-  "C#":"Db",
-  "D#":"Eb",
-  "F#":"Gb",
-  "G#":"Ab",
-  "A#":"Bb"
-};
-
-// Build scale array of 7 notes from root + type, using a chosen chromatic spelling.
-// This is the core "math" builder for unmapped instruments/keys.
-function buildScaleWithChromatic(root, type, chromatic){
-  let r = normalizeNoteName(root);
-
-  // If we are using chord chromatic, convert sharp roots to their flat names when needed
-  if(chromatic === CHROMATIC_CHORDS && SHARP_TO_FLAT[r]) r = SHARP_TO_FLAT[r];
-
-  const rootIdx = chromatic.indexOf(r);
-  const steps = (type === "minor") ? MINOR_STEPS : MAJOR_STEPS;
-
-  if(rootIdx < 0){
-    // safe fallback
-    return (chromatic === CHROMATIC_CHORDS)
-      ? ["C","D","Eb","F","G","Ab","Bb"]
-      : ["C","D","E","F","G","A","B"];
+  [instrument, scaleRoot, scaleType, displayType, switchRule, practiceMode, orderMode].forEach(el=>{
+    if(el) el.addEventListener("change", syncToSettings);
+  });
+  if(customList){
+    customList.addEventListener("input", ()=>{
+      settings.practice.customList = customList.value;
+      refreshPractice();
+      if(isPlaying) restartEngine();
+    });
   }
 
-  return steps.map(semi => chromatic[(rootIdx + semi) % 12]);
+  // initialize UI defaults
+  syncToSettings();
 }
 
-// NOTE fallback: sharp spelling
-function buildScale(root, type){
-  return buildScaleWithChromatic(root, type, CHROMATIC_NOTES);
+/* ===== Profile render ===== */
+function renderTasks() {
+  const container = document.getElementById('tasksList');
+  container.innerHTML = tasks.map(task => `
+    <div class="task-item" onclick="toggleTask(${task.id})">
+      <div class="task-checkbox ${task.completed ? 'completed' : ''}">
+        ${task.completed ? `
+          <svg class="icon-sm" fill="currentColor" viewBox="0 0 20 20" style="color: white;">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        ` : ''}
+      </div>
+      <div class="task-text ${task.completed ? 'completed' : ''}">${task.title}</div>
+      <span class="task-priority priority-${task.priority}">${task.priority}</span>
+    </div>
+  `).join('');
+}
+function toggleTask(taskId) {
+  const task = tasks.find(t => t.id === taskId);
+  if (task) {
+    task.completed = !task.completed;
+    renderTasks();
+    updateTasksCompleted();
+  }
+}
+function updateTasksCompleted() {
+  const completed = tasks.filter(t => t.completed).length;
+  document.getElementById('tasksCompleted').textContent = `${completed}/${tasks.length}`;
+}
+function renderGoals() {
+  const container = document.getElementById('goalsList');
+  container.innerHTML = goals.map(goal => {
+    const percentage = (goal.progress / goal.target) * 100;
+    return `
+      <div class="goal-item">
+        <div class="goal-header">
+          <span class="goal-title">${goal.title}</span>
+          <span class="goal-value">${goal.progress}/${goal.target} ${goal.unit}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${Math.min(percentage, 100)}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+function renderAchievements() {
+  const container = document.getElementById('achievementsList');
+  container.innerHTML = achievements.map(a => `
+    <div class="achievement-item ${a.unlocked ? 'unlocked' : ''}">
+      <div class="achievement-header">
+        <div>
+          <div class="achievement-title ${a.unlocked ? 'unlocked' : ''}" style="display: flex; align-items: center; gap: 8px;">
+            ${a.title}
+            ${a.unlocked ? `
+              <svg class="icon-sm" fill="currentColor" viewBox="0 0 20 20" style="color: #eab308;">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+            ` : ''}
+          </div>
+          <div class="achievement-description">${a.description}</div>
+          ${a.unlocked && a.date ? `<div class="achievement-date">Unlocked: ${a.date}</div>` : ''}
+          ${!a.unlocked && a.progress ? `
+            <div class="achievement-progress">
+              <div class="progress-bar" style="height: 6px;">
+                <div class="progress-fill" style="width: ${a.progress}%"></div>
+              </div>
+              <div class="achievement-progress-text">${a.progress}% complete</div>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
 }
 
-// CHORD fallback: flat spelling
-function buildChordScale(root, type){
-  return buildScaleWithChromatic(root, type, CHROMATIC_CHORDS);
+
+/* ===== Daily Tasks (Profile Page) ===== */
+function todayKey(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
 }
 
-// Bass Guitar (MAJOR) key map provided by you
-const BASS_KEYS_MAJOR = [
-  { name: "C",  scale: ["c","d","e","f","g","a","b"] },
-  { name: "D",  scale: ["d","e","F#","g","a","b","C#"] },
-  { name: "E",  scale: ["e","F#","G#","a","b","C#","D#"] },
-  { name: "F",  scale: ["f","g","a","A#","c","d","e"] },
-  { name: "G",  scale: ["g","a","b","c","d","e","F#"] },
-  { name: "A",  scale: ["a","b","C#","d","e","F#","G#"] },
-  { name: "B",  scale: ["b","c","d","D#","f","g","a"] },
+function loadDailyTasks(){
+  const key = `dailyTasks:${todayKey()}`;
+  try{
+    return JSON.parse(localStorage.getItem(key) || "[]");
+  }catch{ return []; }
+}
+
+function saveDailyTasks(tasks){
+  const key = `dailyTasks:${todayKey()}`;
+  localStorage.setItem(key, JSON.stringify(tasks));
+  // also store history for weekly chart
+  const done = tasks.filter(t=>t.done).length;
+  const total = tasks.length;
+  const pct = total ? Math.round((done/total)*100) : 0;
+  const hKey = `dailyHistory:${todayKey()}`;
+  localStorage.setItem(hKey, JSON.stringify({done,total,pct}));
+  
+  // Save last check date
+  localStorage.setItem('lastDailyTaskCheck', todayKey());
+}
+
+function checkAndResetDailyTasks(){
+  // Check if we're on a new day
+  const lastCheck = localStorage.getItem('lastDailyTaskCheck');
+  const today = todayKey();
+  
+  if(lastCheck && lastCheck !== today){
+    // New day detected - tasks auto-reset (they load from today's empty storage)
+    console.log('New day detected. Daily tasks automatically reset.');
+  }
+  
+  // Update last check to today
+  localStorage.setItem('lastDailyTaskCheck', today);
+}
+
+function setDailyDateLabel(){
+  const el = document.getElementById("dailyDateLabel");
+  if(!el) return;
+  const d = new Date();
+  const options = { weekday: 'long', month: 'short', day: 'numeric' };
+  el.textContent = d.toLocaleDateString(undefined, options);
+}
+
+function renderDailyTasks(){
+  const list = document.getElementById("dailyTasksList");
+  if(!list) return;
+
+  const tasks = loadDailyTasks();
+  list.innerHTML = tasks.map(t => `
+    <div class="daily-task" onclick="toggleDailyTask('${t.id}')">
+      <div class="daily-task-check ${t.done ? 'done' : ''}">
+        ${t.done ? `
+          <svg class="icon-sm" fill="currentColor" viewBox="0 0 20 20" style="color:white;">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        ` : ''}
+      </div>
+      <div class="daily-task-text ${t.done ? 'done' : ''}">${escapeHtml(t.text)}</div>
+      <button class="daily-task-del" type="button" onclick="event.stopPropagation(); deleteDailyTask('${t.id}')">
+        <svg class="icon-sm" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2h1v10a2 2 0 002 2h6a2 2 0 002-2V6h1a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zm-1 6a1 1 0 012 0v7a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v7a1 1 0 11-2 0V8z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+    </div>
+  `).join('');
+
+  const done = tasks.filter(t=>t.done).length;
+  const total = tasks.length;
+  const c = document.getElementById("dailyTasksCompleted");
+  if(c) c.textContent = `${done}/${total}`;
+
+  saveDailyTasks(tasks);
+  drawWeeklyChart();
+}
+
+function addDailyTask(){
+  const preset = document.getElementById("taskPreset");
+  const custom = document.getElementById("taskCustom");
+  if(!preset) return;
+
+  let text = preset.value;
+  if(text === "custom"){
+    text = (custom?.value || "").trim();
+  }
+  if(!text) return;
+
+  const tasks = loadDailyTasks();
+  tasks.push({ id: String(Date.now()) + Math.random().toString(16).slice(2), text, done: false });
+  saveDailyTasks(tasks);
+
+  if(custom) custom.value = "";
+  if(preset) preset.value = "Chord / Notes practice";
+  if(custom) custom.style.display = "none";
+
+  renderDailyTasks();
+}
+
+function toggleDailyTask(id){
+  const tasks = loadDailyTasks();
+  const t = tasks.find(x=>x.id===id);
+  if(!t) return;
+  t.done = !t.done;
+  saveDailyTasks(tasks);
+  renderDailyTasks();
+}
+
+function deleteDailyTask(id){
+  let tasks = loadDailyTasks();
+  tasks = tasks.filter(x=>x.id!==id);
+  saveDailyTasks(tasks);
+  renderDailyTasks();
+}
+
+function resetDailyTasks(){
+  // Manual reset - Clear today's tasks
+  if(confirm('Reset all daily tasks? This will clear your progress for today.')){
+    localStorage.removeItem(`dailyTasks:${todayKey()}`);
+    localStorage.removeItem(`dailyHistory:${todayKey()}`);
+    renderDailyTasks();
+  }
+}
+
+function bindDailyTaskUI(){
+  const preset = document.getElementById("taskPreset");
+  const custom = document.getElementById("taskCustom");
+  if(preset && custom){
+    preset.addEventListener("change", ()=>{
+      custom.style.display = preset.value === "custom" ? "block" : "none";
+      if(preset.value !== "custom") custom.value = "";
+    });
+  }
+}
+
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#39;");
+}
+
+/* ===== Weekly Chart ===== */
+function last7Days(){
+  const days = [];
+  const d = new Date();
+  for(let i=6;i>=0;i--){
+    const x = new Date(d);
+    x.setDate(d.getDate()-i);
+    const y = x.getFullYear();
+    const m = String(x.getMonth()+1).padStart(2,'0');
+    const dd = String(x.getDate()).padStart(2,'0');
+    days.push({ key: `${y}-${m}-${dd}`, date: x });
+  }
+  return days;
+}
+
+function loadHistory(key){
+  try{
+    return JSON.parse(localStorage.getItem(`dailyHistory:${key}`) || "null");
+  }catch{ return null; }
+}
+
+function drawWeeklyChart(){
+  const c = document.getElementById("weeklyChart");
+  if(!c) return;
+  const ctx = c.getContext("2d");
+  const w = c.width, h = c.height;
+  ctx.clearRect(0,0,w,h);
+
+  const days = last7Days();
+  const vals = days.map(d => loadHistory(d.key)?.pct ?? 0);
+
+  // background
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = "rgba(255,255,255,0.03)";
+  ctx.fillRect(0,0,w,h);
+
+  // grid lines
+  ctx.strokeStyle = "rgba(255,255,255,0.12)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for(let i=1;i<=4;i++){
+    const y = (h/5)*i;
+    ctx.moveTo(0,y);
+    ctx.lineTo(w,y);
+  }
+  ctx.stroke();
+
+  const pad = 16;
+  const barGap = 10;
+  const bars = 7;
+  const barW = (w - pad*2 - barGap*(bars-1)) / bars;
+
+  // bars
+  for(let i=0;i<bars;i++){
+    const pct = vals[i];
+    const bh = Math.max(2, (pct/100) * (h - pad*2));
+    const x = pad + i*(barW + barGap);
+    const y = h - pad - bh;
+
+    // bar background
+    ctx.fillStyle = "rgba(255,255,255,0.10)";
+    roundRect(ctx, x, pad, barW, h - pad*2, 10);
+    ctx.fill();
+
+    // bar fill
+    ctx.fillStyle = "#2563eb";
+    roundRect(ctx, x, y, barW, bh, 10);
+    ctx.fill();
+  }
+
+  // legend labels
+  const legend = document.getElementById("weeklyLegend");
+  if(legend){
+    const fmt = (d)=> d.toLocaleDateString(undefined,{weekday:'short'});
+    legend.innerHTML = days.map(d=>`<span>${fmt(d.date)}</span>`).join("");
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r){
+  const rr = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rr, y);
+  ctx.arcTo(x+w, y, x+w, y+h, rr);
+  ctx.arcTo(x+w, y+h, x, y+h, rr);
+  ctx.arcTo(x, y+h, x, y, rr);
+  ctx.arcTo(x, y, x+w, y, rr);
+  ctx.closePath();
+}
+
+/* ===== Share as PDF (WhatsApp via Share Sheet when supported) ===== */
+async function shareWeeklyPdf(){
+  try{
+    // Create a simple PDF-like printable HTML snapshot for the weekly tile + today's tasks
+    const tasks = loadDailyTasks();
+    const done = tasks.filter(t=>t.done).length;
+    const total = tasks.length;
+
+    const days = last7Days();
+    const vals = days.map(d => loadHistory(d.key)?.pct ?? 0);
+
+    const reportHtml = `
+      <html>
+      <head>
+        <meta charset="utf-8"/>
+        <title>Practice Report</title>
+        <style>
+          body{ font-family: Arial, sans-serif; padding: 18px; }
+          h1{ margin: 0 0 6px; }
+          .muted{ color:#555; font-size: 12px; }
+          .box{ border:1px solid #ddd; border-radius: 12px; padding: 12px; margin-top: 12px; }
+          .row{ display:flex; justify-content:space-between; gap:12px; }
+          .barwrap{ display:flex; gap:6px; align-items:flex-end; height: 120px; margin-top: 10px; }
+          .bar{ width: 24px; background:#2563eb; border-radius: 8px 8px 6px 6px; }
+          .labels{ display:flex; gap:6px; margin-top: 6px; font-size: 11px; color:#666; }
+          .labels span{ width: 24px; text-align:center; }
+          ul{ margin: 8px 0 0 18px; }
+        
+/* ===== Layout tweak: Bigger practice tile + smaller ramp tile (Page 1) ===== */
+#page1 .chord-display{
+  padding: 40px 36px !important;
+  border-radius: 32px !important;
+  margin-bottom: 28px !important;
+}
+
+#page1 .chord-top-row{ min-height: 84px !important; }
+
+#page1 .chord-name.chord-center{
+  font-size: 56px !important;
+  letter-spacing: 0.6px !important;
+}
+
+#page1 .metronome-visual{
+  margin-top: 18px !important;
+  margin-bottom: 32px !important;
+}
+
+#page1 .start-stop-button{
+  padding: 24px 72px !important;
+  border-radius: 22px !important;
+  font-size: 22px !important;
+}
+
+/* Ramp mini card: make it compact */
+#page1 .ramp-panel{
+  padding: 14px 14px 12px !important;
+  border-radius: 20px !important;
+}
+
+#page1 .ramp-panel-header{
+  margin-bottom: 10px !important;
+  gap: 10px !important;
+}
+
+#page1 .ramp-panel-title{
+  font-size: 13px !important;
+  font-weight: 850 !important;
+}
+
+#page1 .ramp-panel-sub{
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+}
+
+#page1 #rampChart{
+  height: 90px !important;   /* compact preview */
+  padding: 10px !important;
+  border-radius: 14px !important;
+}
+
+
+/* ===== Header Tile (Flat style) ===== */
+.header-tile{
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #ffffff;
+}
+
+.header-title{
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+}
+
+.header-subtitle{
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+</style>
+      </head>
+      <body>
+        <h1>Weekly Practice Report</h1>
+        <div class="muted">${new Date().toLocaleString()}</div>
+
+        <div class="box">
+          <div class="row">
+            <strong>Today’s tasks</strong>
+            <span>${done}/${total} completed</span>
+          </div>
+          <ul>
+            ${tasks.map(t=>`<li>${t.done ? "✅" : "⬜"} ${escapeHtml(t.text)}</li>`).join("") || "<li>No tasks</li>"}
+          </ul>
+        </div>
+
+        <div class="box">
+          <div class="row"><strong>Last 7 days completion</strong><span>(%)</span></div>
+          <div class="barwrap">
+            ${vals.map(v=>`<div class="bar" style="height:${Math.max(4, v)}px"></div>`).join("")}
+          </div>
+          <div class="labels">
+            ${days.map(d=>`<span>${d.date.toLocaleDateString(undefined,{weekday:'short'}).slice(0,3)}</span>`).join("")}
+          </div>
+        </div>
+      
+<!-- App Footer -->
+<div class="app-footer">
+  <span>© 2026 Practice Trainer</span>
+</div>
+
+</body>
+      </html>
+    `;
+
+    // Convert to a PDF via browser print-to-PDF fallback:
+    // We'll open a new window and let user share the PDF from the system share sheet (best on mobile).
+    const win = window.open("", "_blank");
+    if(!win) throw new Error("Popup blocked");
+    win.document.open();
+    win.document.write(reportHtml);
+    win.document.close();
+
+    // Give the user the best path:
+    // - On iOS/Android: use Share button in the browser PDF/print UI to WhatsApp.
+    win.focus();
+    setTimeout(()=>{ win.print(); }, 250);
+
+    alert("A report window opened. Use Print → Save as PDF, then share to WhatsApp from your phone’s share sheet.");
+  }catch(e){
+    alert("Sharing PDF depends on your phone/browser. If it doesn't open, try in Chrome on Android or Safari on iPhone.");
+  }
+}
+
+
+
+/* ===== Page 3: Daily tasks system ===== */
+const DEFAULT_TASK_TEMPLATES = [
+  { id: "lr", title: "Left / Right hand exercise", minutes: 10 },
+  { id: "cn", title: "Chord / Notes practice", minutes: 15 },
+  { id: "cp", title: "Continuous practice (no break)", minutes: 10 }
 ];
 
-// Bass Guitar (NATURAL MINOR) key map (Aeolian) - added per your request
-// Natural minor degrees: 1 2 b3 4 5 b6 b7
-const BASS_KEYS_MINOR = [
-  { name: "C",  scale: ["C","D","D#","F","G","G#","A#"] },
-  { name: "D",  scale: ["D","E","F","G","A","A#","C"] },
-  { name: "E",  scale: ["E","F#","G","A","B","C","D"] },
-  { name: "F",  scale: ["F","G","G#","A#","C","C#","D#"] },
-  { name: "G",  scale: ["G","A","A#","C","D","D#","F"] },
-  { name: "A",  scale: ["A","B","C","D","E","F","G"] },
-  { name: "B",  scale: ["B","C#","D","E","F#","G","A"] },
-];
+const GOAL_MINUTES_DEFAULT = 30;
 
-// Instrument map (extend this later with your own keys / chord-code systems)
-const INSTRUMENT_KEYMAP = {
-  bass: {
-    major: BASS_KEYS_MAJOR,
-    minor: BASS_KEYS_MINOR
-  },
-  guitar: {
-    // currently uses fallback formula (diatonic)
-  },
-  piano: {
-    // currently uses fallback formula (diatonic)
-  }
-};
-
-// Fallback: build scale array of 7 notes from root + type (diatonic math)
-function buildScale(root, type){
-  const r = normalizeNoteName(root);
-  const rootIdx = CHROMATIC.indexOf(r);
-  const steps = (type === "minor") ? MINOR_STEPS : MAJOR_STEPS;
-  if(rootIdx < 0) return ["C","D","E","F","G","A","B"]; // safe fallback
-  return steps.map(semi => CHROMATIC[(rootIdx + semi) % 12]);
+function dateKey(d=new Date()){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
 }
 
-// Main resolver used by the trainer:
-// returns the 7-note scale for (instrument, root, type).
-function getNoteScaleNotes(baseType){
-  // baseType is "major" or "minor" (natural minor)
-  const instrument = $("instrument").value;
-  const root = normalizeNoteName($("scaleRoot").value);
-
-  const inst = INSTRUMENT_KEYMAP[instrument];
-  const mapped = inst && inst[baseType];
-  if(Array.isArray(mapped) && mapped.length){
-    const hit = mapped.find(k => normalizeNoteName(k.name) === root);
-    if(hit && Array.isArray(hit.scale) && hit.scale.length === 7){
-      return hit.scale.map(normalizeNoteName);
-    }
+function loadTaskTemplates(){
+  try{
+    const raw = localStorage.getItem("taskTemplates:v1");
+    if(!raw) return DEFAULT_TASK_TEMPLATES.slice();
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed) || parsed.length===0) return DEFAULT_TASK_TEMPLATES.slice();
+    // ensure required fields
+    return parsed.map(t=>({
+      id: String(t.id || cryptoRandomId()),
+      title: String(t.title || "Task"),
+      minutes: clampInt(t.minutes, 1, 600, 10)
+    }));
+  }catch{
+    return DEFAULT_TASK_TEMPLATES.slice();
   }
-
-  // not mapped -> fall back to diatonic formula
-  return buildScale(root, baseType).map(normalizeNoteName);
-}function getChordScaleNotes(baseType){
-  // baseType is "major" or "minor" (natural minor)
-  const instrument = $("instrument").value;
-  const root = normalizeNoteName($("scaleRoot").value);
-
-  // If the instrument has an explicit map, use it (and then respell to chord-friendly names).
-  const inst = INSTRUMENT_KEYMAP[instrument];
-  const mapped = inst && inst[baseType];
-  if(Array.isArray(mapped) && mapped.length){
-    const hit = mapped.find(k => normalizeNoteName(k.name) === root);
-    if(hit && Array.isArray(hit.scale) && hit.scale.length === 7){
-      // Convert any sharps to flats for chord labels (edit SHARP_TO_FLAT if you prefer sharps)
-      return hit.scale.map(n => {
-        const nn = normalizeNoteName(n);
-        return SHARP_TO_FLAT[nn] ? SHARP_TO_FLAT[nn] : nn;
-      });
-    }
-  }
-
-  // Not mapped -> use chord spelling fallback builder
-  return buildChordScale(root, baseType).map(normalizeNoteName);
 }
 
-// Build a 7-item chord list (triads) from a 7-note scale, using the standard quality patterns.
-// We output chord symbols like: C, Dm, Em, F, G, Am, Bdim
-function buildChordList(scaleNotes, qualityPattern){
+function saveTaskTemplatesToStorage(tasks){
+  localStorage.setItem("taskTemplates:v1", JSON.stringify(tasks));
+}
+
+function loadGoalMinutes(){
+  const v = parseInt(localStorage.getItem("goalMinutes:v1") || String(GOAL_MINUTES_DEFAULT), 10);
+  return clampInt(v, 1, 600, GOAL_MINUTES_DEFAULT);
+}
+
+function saveGoalMinutes(v){
+  localStorage.setItem("goalMinutes:v1", String(clampInt(v,1,600,GOAL_MINUTES_DEFAULT)));
+}
+
+function loadTodayStatus(){
+  const key = `todayStatus:${dateKey()}`;
+  try{
+    const raw = localStorage.getItem(key);
+    if(!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  }catch{
+    return {};
+  }
+}
+
+function saveTodayStatus(status){
+  const key = `todayStatus:${dateKey()}`;
+  localStorage.setItem(key, JSON.stringify(status));
+}
+
+function clampInt(v, min, max, fallback){
+  const n = parseInt(v, 10);
+  if(Number.isNaN(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
+}
+
+function cryptoRandomId(){
+  try{
+    const a = new Uint32Array(2);
+    crypto.getRandomValues(a);
+    return a[0].toString(16) + a[1].toString(16);
+  }catch{
+    return String(Date.now()) + Math.random().toString(16).slice(2);
+  }
+}
+
+/* ===== Tile 1: Create/Edit ===== */
+function renderTaskEditor(){
+  const list = document.getElementById("taskEditorList");
+  if(!list) return;
+
+  const tasks = loadTaskTemplates();
+  list.innerHTML = tasks.map((t, idx)=>`
+    <div class="task-editor-item">
+      <div class="task-editor-name">${escapeHtml(t.title)}</div>
+      <div class="task-editor-time">
+        <input class="time-input" type="number" min="1" max="600" value="${t.minutes}"
+               onchange="updateTemplateMinutes('${t.id}', this.value)" />
+        <span class="time-suffix">min</span>
+      </div>
+    </div>
+  `).join("");
+
+  // also update goal label
+  const goal = loadGoalMinutes();
+  const goalEl = document.getElementById("goalMinutesLabel");
+  if(goalEl) goalEl.textContent = String(goal);
+}
+
+function updateTemplateMinutes(id, v){
+  const tasks = loadTaskTemplates();
+  const t = tasks.find(x=>x.id===id);
+  if(!t) return;
+  t.minutes = clampInt(v, 1, 600, t.minutes);
+  saveTaskTemplatesToStorage(tasks);
+  renderTodayTasks();
+  drawWeeklyChartMinutes();
+}
+
+function saveTaskTemplates(){
+  // currently minutes save on change; this just refreshes
+  renderTaskEditor();
+  renderTodayTasks();
+  drawWeeklyChartMinutes();
+}
+
+function resetDefaultTasks(){
+  saveTaskTemplatesToStorage(DEFAULT_TASK_TEMPLATES.slice());
+  renderTaskEditor();
+  renderTodayTasks();
+  drawWeeklyChartMinutes();
+}
+
+/* ===== Tile 2: Today’s tasks ===== */
+function setTodayDateLabel(){
+  const el = document.getElementById("todayDateLabel");
+  if(!el) return;
+  const d = new Date();
+  el.textContent = d.toLocaleDateString(undefined, { weekday:'long', month:'short', day:'numeric' });
+}
+
+function ensureTodayInitialized(){
+  // If there is no status for today, create default (all undone)
+  const status = loadTodayStatus();
+  const tasks = loadTaskTemplates();
+  let changed = false;
+
+  tasks.forEach(t=>{
+    if(status[t.id] === undefined){
+      status[t.id] = false;
+      changed = true;
+    }
+  });
+
+  // Remove statuses for tasks that no longer exist
+  const validIds = new Set(tasks.map(t=>t.id));
+  Object.keys(status).forEach(k=>{
+    if(!validIds.has(k)){
+      delete status[k];
+      changed = true;
+    }
+  });
+
+  if(changed) saveTodayStatus(status);
+}
+
+function toggleTodayTask(id){
+  const status = loadTodayStatus();
+  status[id] = !status[id];
+  saveTodayStatus(status);
+  renderTodayTasks();
+  drawWeeklyChartMinutes();
+}
+
+function renderTodayTasks(){
+  ensureTodayInitialized();
+  const list = document.getElementById("todayTaskList");
+  if(!list) return;
+
+  const tasks = loadTaskTemplates();
+  const status = loadTodayStatus();
+
+  let doneMin = 0;
+  let totalMin = 0;
+
+  list.innerHTML = tasks.map(t=>{
+    const done = !!status[t.id];
+    totalMin += t.minutes;
+    if(done) doneMin += t.minutes;
+
+    return `
+      <div class="today-task">
+        <div class="today-task-check ${done ? 'done' : ''}" onclick="toggleTodayTask('${t.id}')">
+          ${done ? `
+            <svg class="icon-sm" fill="currentColor" viewBox="0 0 20 20" style="color:white;">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          ` : ''}
+        </div>
+        <div class="today-task-text">${escapeHtml(t.title)}</div>
+        <div class="today-task-meta">${t.minutes} min</div>
+      </div>
+    `;
+  }).join("");
+
+  const doneEl = document.getElementById("todayDoneMin");
+  const totalEl = document.getElementById("todayTotalMin");
+  if(doneEl) doneEl.textContent = String(doneMin);
+  if(totalEl) totalEl.textContent = String(totalMin);
+
+  // persist daily history for chart
+  const goal = loadGoalMinutes();
+  const achieved = doneMin >= goal;
+  localStorage.setItem(`dailyTotal:${dateKey()}`, JSON.stringify({ minutes: doneMin, goal, achieved }));
+}
+
+/* ===== Tile 3: Weekly chart (minutes + goal) ===== */
+function last7Days(){
   const out = [];
-  for(let i=0;i<7;i++){
-    const root = scaleNotes[i];
-    const q = qualityPattern[i];
-    if(q === "maj") out.push(root);
-    else if(q === "min") out.push(root + "m");
-    else if(q === "dim") out.push(root + "dim");
-    else out.push(root); // safe fallback
+  const base = new Date();
+  for(let i=6;i>=0;i--){
+    const d = new Date(base);
+    d.setDate(base.getDate()-i);
+    out.push({ d, key: dateKey(d) });
   }
   return out;
 }
 
-// Main resolver used by the trainer:
-// returns the 7-item list for (instrument, root, scaleType).
-// This list is used everywhere (display, quiz pools, etc.)
-function getScaleNotes(){
-  const type = $("scaleType").value; // "major" | "minor" | "major_chords" | "minor_chords"
-
-  // 1) NOTE LISTS (existing)
-  if(type === "major" || type === "minor"){
-    return getNoteScaleNotes(type);
-  }
-
-  // 2) CHORD LISTS (new)
-  // Major key triad qualities: I maj, ii min, iii min, IV maj, V maj, vi min, vii° dim
-  if(type === "major_chords"){
-    const notes = getNoteScaleNotes("major");
-    const qualities = ["maj","min","min","maj","maj","min","dim"];
-    return buildChordList(notes, qualities);
-  }
-
-  // Natural minor key triad qualities: i min, ii° dim, III maj, iv min, v min, VI maj, VII maj
-  if(type === "minor_chords"){
-    const notes = getNoteScaleNotes("minor");
-    const qualities = ["min","dim","maj","min","min","maj","maj"];
-    return buildChordList(notes, qualities);
-  }
-
-  // fallback
-  return getNoteScaleNotes("major");
-}
-
-// Convert note -> midi number -> frequency (used for "Play note")
-function noteToMidi(note, octave=4){
-  const idx = CHROMATIC_NOTES.indexOf(normalizeNoteName(note));
-  if(idx < 0) return 60;
-  return 60 + idx + (octave - 4) * 12;
-}
-function midiToFreq(m){ return 440 * Math.pow(2, (m - 69) / 12); }
-
-// Audio context for "Play note" practice
-let toneCtx = null;
-function ensureToneAudio(){
-  if(!toneCtx) toneCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return toneCtx;
-}
-function playTone(freq, ms=450){
-  const ctx = ensureToneAudio();
-  if(ctx.state === "suspended") ctx.resume();
-
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = "sine";
-  osc.frequency.value = freq;
-
-  const t = ctx.currentTime;
-  gain.gain.setValueAtTime(0.0001, t);
-  gain.gain.exponentialRampToValueAtTime(0.30, t + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.0001, t + ms/1000);
-
-  osc.connect(gain).connect(ctx.destination);
-  osc.start(t);
-  osc.stop(t + ms/1000 + 0.02);
-}
-
-// Speak toggle + helper
-let speakEnabled = true;
-// =====================================================================
-// SPEECH OUTPUT (Fix "capital C" / casing announcements)
-// ---------------------------------------------------------------------
-// Some browsers speak single-letter notes like "C" as "capital C".
-// We keep the UI display unchanged, but transform ONLY the spoken text.
-// Examples:
-//   "C#"   -> "c sharp"
-//   "Db"   -> "d flat"
-//   "Am"   -> "a minor"
-//   "Bdim" -> "b diminished"
-// =====================================================================
-
-function formatForSpeech(raw){
-  if(!raw) return "";
-
-  let t = String(raw).trim();
-
-  // Convert accidentals
-  t = t.replace(/#/g, " sharp");
-  // Flats: "Db" or "Bb" -> "D flat", "B flat"
-  t = t.replace(/([A-Ga-g])b\b/g, "$1 flat");
-
-  // Chord qualities
-  t = t.replace(/dim\b/gi, " diminished");
-  // "m" minor (avoid touching "maj" / "major")
-  t = t.replace(/(^|[^a-zA-Z])m\b/gi, "$1 minor");
-
-  // Clean up extra spaces
-  t = t.replace(/\s+/g, " ").trim();
-
-  // Lowercase helps avoid "capital" announcements on many voices
-  return t.toLowerCase();
-}
-
-function speakValue(text){
-  if(!speakEnabled) return;
-  if(!("speechSynthesis" in window)) return;
-
-  const spokenText = formatForSpeech(text);
-
+function loadDailyTotal(key){
   try{
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(spokenText);
-    u.rate = 1.0;
-    u.pitch = 1.0;
-    speechSynthesis.speak(u);
-  }catch(e){}
-}
-function syncSpeakToggle(){
-  $("speakToggle").textContent = `SPEAK: ${speakEnabled ? "ON" : "OFF"}`;
-  $("speakToggle").classList.toggle("on", speakEnabled);
-}
-$("speakToggle").addEventListener("click", () => {
-  speakEnabled = !speakEnabled;
-  syncSpeakToggle();
-});
-syncSpeakToggle();
-
-// Metronome mute toggle (controls clickMuted)
-function syncTrainingMetroToggleUI(){
-  if(METRONOME.clickMuted){
-    $("metroToggle").textContent = "METRONOME: OFF";
-    $("metroToggle").classList.remove("on");
-  } else {
-    $("metroToggle").textContent = "METRONOME: ON";
-    $("metroToggle").classList.add("on");
-  }
-}
-$("metroToggle").addEventListener("click", () => {
-  METRONOME.clickMuted = !METRONOME.clickMuted;
-  syncTrainingMetroToggleUI();
-  updateMetronomeConfigUI(true);
-});
-syncTrainingMetroToggleUI();
-
-// Trainer state variables
-let tRunning = false;
-let tScaleNotes = getScaleNotes();
-let tDegreeIdx = 0;
-let tDirection = 1;
-
-// Display helpers
-function tCurrentDegree(){ return tDegreeIdx + 1; }
-function tCurrentNote(){ return tScaleNotes[tDegreeIdx]; }
-function tScaleName(){
-  const root = $("scaleRoot").value;
-  const t = $("scaleType").value;
-
-  if(t === "major") return `${root} Major`;
-  if(t === "minor") return `${root} Natural Minor`;
-  if(t === "major_chords") return `${root} Major Chords`;
-  if(t === "minor_chords") return `${root} Minor Chords`;
-  return `${root} Major`;
-}
-function tDisplayText(){
-  return ($("displayMode").value === "notes") ? tCurrentNote() : String(tCurrentDegree());
-}
-
-// Show current target on UI
-function tShowTarget(){
-  $("bigNote").textContent = tDisplayText();
-  $("scaleBadge").textContent = tScaleName();
-
-  // If currently in quiz mode, update quiz options
-  if($("practiceType").value === "quiz") tRenderQuiz();
-}
-
-// Beat switch rules: control when the target changes
-function shouldSwitchOnBeat(beatNum){
-  const mode = $("beatSwitch").value;
-  if(mode === "every") return true;
-  if(mode === "first") return beatNum === 1;
-  if(mode === "every2") return beatNum % 2 === 0;
-  if(mode === "one_three") return beatNum === 1 || beatNum === 3;
-  if(mode === "one_four") return beatNum === 1 || beatNum === 4;
-  return true;
-}
-
-// Order modes for selecting next degree
-function advanceTargetByOrder(){
-  const order = $("orderMode").value;
-
-  if(order === "ascending"){
-    tDegreeIdx = (tDegreeIdx + 1) % 7;
-  } else if(order === "asc_desc"){
-    tDegreeIdx += tDirection;
-    if(tDegreeIdx >= 6){ tDegreeIdx = 6; tDirection = -1; }
-    else if(tDegreeIdx <= 0){ tDegreeIdx = 0; tDirection = 1; }
-  } else if(order === "random"){
-    tDegreeIdx = Math.floor(Math.random() * 7);
-  }
-  // freestyle does not auto advance
-  tShowTarget();
-}
-
-// Execute action depending on practiceType
-function runPracticeAction(){
-  const type = $("practiceType").value;
-  if(type === "quiz") return;
-
-  if(type === "speak"){
-    speakValue(tDisplayText());
-  } else if(type === "play"){
-    const freq = midiToFreq(noteToMidi(tCurrentNote(), 4));
-    playTone(freq, 450);
+    const raw = localStorage.getItem(`dailyTotal:${key}`);
+    if(!raw) return { minutes: 0, goal: loadGoalMinutes(), achieved: false };
+    const p = JSON.parse(raw);
+    const minutes = clampInt(p?.minutes, 0, 10000, 0);
+    const goal = clampInt(p?.goal, 1, 600, loadGoalMinutes());
+    const achieved = !!p?.achieved;
+    return { minutes, goal, achieved };
+  }catch{
+    return { minutes: 0, goal: loadGoalMinutes(), achieved: false };
   }
 }
 
-// Freestyle: clicking big display advances (only when NOT quiz)
-$("bigDisplay").addEventListener("click", () => {
-  if($("practiceType").value === "quiz") return;
+function drawWeeklyChartMinutes(){
+  const c = document.getElementById("weeklyChart");
+  if(!c) return;
+  const ctx = c.getContext("2d");
+  const w = c.width, h = c.height;
+  ctx.clearRect(0,0,w,h);
 
-  if($("orderMode").value === "freestyle"){
-    tDegreeIdx = (tDegreeIdx + 1) % 7;
-    tShowTarget();
-    if(tRunning) runPracticeAction();
+  const days = last7Days();
+  const goal = loadGoalMinutes();
+  const series = days.map(x=>loadDailyTotal(x.key).minutes);
+
+  const maxV = Math.max(goal, ...series, 1);
+  const pad = 18;
+  const barGap = 10;
+  const bars = 7;
+  const barW = (w - pad*2 - barGap*(bars-1)) / bars;
+  const chartH = h - pad*2;
+
+  // background
+  ctx.fillStyle = "rgba(255,255,255,0.03)";
+  ctx.fillRect(0,0,w,h);
+
+  // grid
+  ctx.strokeStyle = "rgba(255,255,255,0.12)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for(let i=1;i<=4;i++){
+    const y = (h/5)*i;
+    ctx.moveTo(0,y);
+    ctx.lineTo(w,y);
   }
-});
+  ctx.stroke();
 
+  // goal line
+  const goalY = h - pad - (goal/maxV)*chartH;
+  ctx.strokeStyle = "rgba(250, 204, 21, 0.95)"; // yellow goal line
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(pad-6, goalY);
+  ctx.lineTo(w-pad+6, goalY);
+  ctx.stroke();
 
-/* =====================================================================
-   7) QUIZ
-   ===================================================================== */
+  // bars
+  for(let i=0;i<bars;i++){
+    const v = series[i];
+    const achieved = v >= goal;
+    const bh = Math.max(2, (v/maxV)*chartH);
+    const x = pad + i*(barW+barGap);
+    const y = h - pad - bh;
 
-// Fisher–Yates shuffle
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i], a[j]] = [a[j], a[i]];
+    // bar track
+    ctx.fillStyle = "rgba(255,255,255,0.10)";
+    roundRect(ctx, x, pad, barW, chartH, 10);
+    ctx.fill();
+
+    // bar fill
+    ctx.fillStyle = achieved ? "rgba(34,197,94,0.95)" : "#2563eb";
+    roundRect(ctx, x, y, barW, bh, 10);
+    ctx.fill();
+
+    // crown/mark if achieved
+    if(achieved){
+      ctx.fillStyle = "rgba(255,255,255,0.95)";
+      ctx.font = "bold 12px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("★", x + barW/2, y - 6);
+    }
   }
-  return a;
+
+  // legend
+  const legend = document.getElementById("weeklyLegend");
+  if(legend){
+    const fmt = (d)=> d.toLocaleDateString(undefined,{weekday:'short'}).slice(0,3);
+    legend.innerHTML = days.map(x=>`<span>${fmt(x.d)}</span>`).join("");
+  }
 }
 
-// pick count items excluding a set
-function uniqueRandomChoices(pool, count, excludeSet){
-  const picks = [];
-  const safePool = pool.filter(x => !excludeSet.has(x));
-  while(picks.length < count && safePool.length){
-    const idx = Math.floor(Math.random()*safePool.length);
-    picks.push(safePool.splice(idx,1)[0]);
-  }
-  return picks;
+function roundRect(ctx, x, y, w, h, r){
+  const rr = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rr, y);
+  ctx.arcTo(x+w, y, x+w, y+h, rr);
+  ctx.arcTo(x+w, y+h, x, y+h, rr);
+  ctx.arcTo(x, y+h, x, y, rr);
+  ctx.arcTo(x, y, x+w, y, rr);
+  ctx.closePath();
 }
 
-let tLocked = false;
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#39;");
+}
 
-// Create quiz UI options based on display mode
-function tRenderQuiz(){
-  $("quizBox").style.display = "grid";
-  $("answers").innerHTML = "";
-  tLocked = false;
+/* ===== Share: PDF via print-to-PDF + share sheet ===== */
+async function shareAchievementPdf(){
+  try{
+    // Build a simple report window, user can Print -> Save as PDF, then share to WhatsApp/social
+    const tasks = loadTaskTemplates();
+    const status = loadTodayStatus();
+    let doneMin=0, totalMin=0;
 
-  const display = $("displayMode").value;
-  const correctDegree = tCurrentDegree();
-  const correctNote = tCurrentNote();
-
-  if(display === "notes"){
-    $("quizRule").textContent = "Rule: Notes → pick the Nashville number";
-
-    const correct = String(correctDegree);
-    const pool = ["1","2","3","4","5","6","7"];
-    const wrongs = uniqueRandomChoices(pool, 3, new Set([correct]));
-    const options = shuffle([correct, ...wrongs]);
-
-    options.forEach(opt => {
-      const btn = document.createElement("button");
-      btn.className = "answerBtn";
-      btn.type = "button";
-      btn.textContent = opt;
-      btn.addEventListener("click", () => tHandleAnswer(btn, opt, correct));
-      $("answers").appendChild(btn);
+    const items = tasks.map(t=>{
+      totalMin += t.minutes;
+      const done = !!status[t.id];
+      if(done) doneMin += t.minutes;
+      return { title: t.title, minutes: t.minutes, done };
     });
 
-  } else {
-    $("quizRule").textContent = "Rule: Nashville # → pick the note name";
+    const days = last7Days();
+    const goal = loadGoalMinutes();
+    const series = days.map(x=>({ label: x.d.toLocaleDateString(undefined,{weekday:'short'}), minutes: loadDailyTotal(x.key).minutes }));
 
-    const correct = correctNote;
-    const pool = tScaleNotes;
-    const wrongs = uniqueRandomChoices(pool, 3, new Set([correct]));
-    const options = shuffle([correct, ...wrongs]);
+    const reportHtml = `
+      <html>
+      <head>
+        <meta charset="utf-8"/>
+        <title>Practice Achievement</title>
+        <style>
+          body{ font-family: Arial, sans-serif; padding: 18px; }
+          h1{ margin: 0 0 6px; }
+          .muted{ color:#555; font-size: 12px; }
+          .box{ border:1px solid #ddd; border-radius: 12px; padding: 12px; margin-top: 12px; }
+          .row{ display:flex; justify-content:space-between; gap:12px; align-items:center; }
+          ul{ margin: 8px 0 0 18px; }
+          .barwrap{ display:flex; gap:6px; align-items:flex-end; height: 140px; margin-top: 10px; }
+          .bar{ width: 26px; background:#2563eb; border-radius: 8px 8px 6px 6px; }
+          .bar.ach{ background:#22c55e; }
+          .labels{ display:flex; gap:6px; margin-top: 6px; font-size: 11px; color:#666; }
+          .labels span{ width: 26px; text-align:center; }
+          .goal{ color:#b45309; font-weight: 700; }
+        
+/* ===== Layout tweak: Bigger practice tile + smaller ramp tile (Page 1) ===== */
+#page1 .chord-display{
+  padding: 40px 36px !important;
+  border-radius: 32px !important;
+  margin-bottom: 28px !important;
+}
 
-    options.forEach(opt => {
-      const btn = document.createElement("button");
-      btn.className = "answerBtn";
-      btn.type = "button";
-      btn.textContent = opt;
-      btn.addEventListener("click", () => tHandleAnswer(btn, opt, correct));
-      $("answers").appendChild(btn);
-    });
+#page1 .chord-top-row{ min-height: 84px !important; }
+
+#page1 .chord-name.chord-center{
+  font-size: 56px !important;
+  letter-spacing: 0.6px !important;
+}
+
+#page1 .metronome-visual{
+  margin-top: 18px !important;
+  margin-bottom: 32px !important;
+}
+
+#page1 .start-stop-button{
+  padding: 24px 72px !important;
+  border-radius: 22px !important;
+  font-size: 22px !important;
+}
+
+/* Ramp mini card: make it compact */
+#page1 .ramp-panel{
+  padding: 14px 14px 12px !important;
+  border-radius: 20px !important;
+}
+
+#page1 .ramp-panel-header{
+  margin-bottom: 10px !important;
+  gap: 10px !important;
+}
+
+#page1 .ramp-panel-title{
+  font-size: 13px !important;
+  font-weight: 850 !important;
+}
+
+#page1 .ramp-panel-sub{
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+}
+
+#page1 #rampChart{
+  height: 90px !important;   /* compact preview */
+  padding: 10px !important;
+  border-radius: 14px !important;
+}
+
+
+/* ===== Header Tile (Flat style) ===== */
+.header-tile{
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #ffffff;
+}
+
+.header-title{
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+}
+
+.header-subtitle{
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+</style>
+      </head>
+      <body>
+        <h1>Weekly Practice Achievement</h1>
+        <div class="muted">${new Date().toLocaleString()}</div>
+
+        <div class="box">
+          <div class="row">
+            <strong>Today’s tasks</strong>
+            <span>${doneMin}/${totalMin} minutes</span>
+          </div>
+          <ul>
+            ${items.map(t=>`<li>${t.done ? "✅" : "⬜"} ${escapeHtml(t.title)} — ${t.minutes} min</li>`).join("")}
+          </ul>
+        </div>
+
+        <div class="box">
+          <div class="row">
+            <strong>Last 7 days</strong>
+            <span class="goal">Goal: ${goal} min/day</span>
+          </div>
+          <div class="barwrap">
+            ${series.map(x=>{
+              const h = Math.max(6, Math.min(140, x.minutes));
+              const ach = x.minutes >= goal ? "ach" : "";
+              return `<div class="bar ${ach}" style="height:${h}px"></div>`;
+            }).join("")}
+          </div>
+          <div class="labels">
+            ${series.map(x=>`<span>${x.label.slice(0,3)}</span>`).join("")}
+          </div>
+        </div>
+      
+<!-- App Footer -->
+<div class="app-footer">
+  <span>© 2026 Practice Trainer</span>
+</div>
+
+</body>
+      </html>
+    `;
+
+    const win = window.open("", "_blank");
+    if(!win) throw new Error("Popup blocked");
+    win.document.open();
+    win.document.write(reportHtml);
+    win.document.close();
+    win.focus();
+
+    // Print dialog for Save as PDF (mobile-friendly)
+    setTimeout(()=>{ win.print(); }, 250);
+
+    // Hint (non-blocking)
+    setTimeout(()=>{
+      alert("Use Print → Save as PDF, then share to WhatsApp / social apps from your phone’s share sheet.");
+    }, 600);
+  }catch(e){
+    alert("Sharing PDF depends on your phone/browser. If it fails, try in Chrome (Android) or Safari (iPhone).");
   }
 }
 
-// Quiz answer handling: highlight correct/wrong, update streak
-function tHandleAnswer(clickedBtn, chosen, correct){
-  if(tLocked) return;
-  tLocked = true;
 
-  // highlight correct answer
-  [...$("answers").querySelectorAll(".answerBtn")].forEach(b => {
-    if(b.textContent === correct) b.classList.add("correct");
+/* ===== Init ===== */
+function init() {
+  updateMetronomeVisual('metronomeVisual');
+  updateMetronomeVisual('metronomeVisual2');
+  updateBeatIndicators();
+
+  // hook touch swipe
+  const pc = document.getElementById('pagesContainer');
+  pc.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, {passive:true});
+  pc.addEventListener('touchend', (e) => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, {passive:true});
+
+  // bind practice inputs
+  bindPracticeInputs();
+
+  // bind metronome controls
+  const timeSig = document.getElementById("timeSignature");
+  if(timeSig) timeSig.addEventListener("change", updateTimeSignature);
+
+  bindSubdivision();
+
+  // saved theme
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  if (savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.getElementById('sunIcon').style.display = 'none';
+    document.getElementById('moonIcon').style.display = 'block';
+  }
+
+  // Auto-reset daily tasks if it's a new day
+  checkAndResetDailyTasks();
+
+  // profile
+// stop on background
+  setDailyDateLabel();
+  bindDailyTaskUI();
+  renderDailyTasks();
+  drawWeeklyChart();
+
+document.addEventListener("visibilitychange", ()=>{
+    if(document.hidden && isPlaying) stopEngine();
   });
 
-  if(chosen !== correct){
-    // wrong: reset streak
-    clickedBtn.classList.add("wrong");
-    currentQuizScore = 0;
-    saveStats(); updateScoreUI();
-    setTimeout(() => { tLocked = false; }, 350);
-    return;
-  }
-
-  // correct: increment streak
-  currentQuizScore += 1;
-  if(currentQuizScore > STATS.quizHighScore) STATS.quizHighScore = currentQuizScore;
-  saveStats(); updateScoreUI();
-
-  // move to new random degree
-  setTimeout(() => {
-    tLocked = false;
-    tDegreeIdx = Math.floor(Math.random() * 7);
-    tShowTarget();
-  }, 450);
+  // Page 3
+  renderTaskEditor();
+  setTodayDateLabel();
+  renderTodayTasks();
+  drawWeeklyChartMinutes();
+  
+  // Check for day change every minute while app is open
+  setInterval(() => {
+    checkAndResetDailyTasks();
+    setDailyDateLabel();
+    setTodayDateLabel();
+  }, 60000); // Check every 60 seconds
 }
 
-// Next button: force new question
-$("nextBtn").addEventListener("click", () => {
-  if($("practiceType").value !== "quiz") return;
-  tDegreeIdx = Math.floor(Math.random() * 7);
-  tShowTarget();
-});
-
-
-/* =====================================================================
-   Trainer rebuild when dropdowns change
-   ===================================================================== */
-
-function tRebuild(){
-  // rebuild scale
-  tScaleNotes = getScaleNotes();
-  tDegreeIdx = 0;
-  tDirection = 1;
-  tShowTarget();
-
-  // quiz visibility + session behavior
-  if($("practiceType").value !== "quiz"){
-    stopQuizSession();
-    $("quizBox").style.display = "none";
-  } else {
-    $("quizBox").style.display = "grid";
-    tRenderQuiz();
-    if(tRunning) startQuizSession();
-
-    // quiz mode: stop metronome (your original rule)
-    if(METRONOME.running){
-      stopMetronome();
-    }
-    setActiveBeat($("trainingBeats"), 1);
-  }
-}
-
-// bind rebuild to all relevant selects
-["scaleRoot","scaleType","displayMode","orderMode","beatSwitch","practiceType","instrument"].forEach(id=>{
-  $(id).addEventListener("change", tRebuild);
-});
-
-
-/* =====================================================================
-   Main training Start/Stop button
-   ===================================================================== */
-
-$("toggleBtn").addEventListener("click", () => {
-  // Ensure audio unlocked on first click (important for iOS)
-  ensureAudio();
-
-  tRunning = !tRunning;
-
-  // Practice session timer
-  if(tRunning) startPracticeSession();
-  else { stopPracticeSession(); stopQuizSession(); }
-
-  if(tRunning){
-    $("toggleBtn").textContent = "Stop";
-    $("toggleBtn").classList.add("running");
-    tShowTarget();
-
-    if($("practiceType").value === "quiz"){
-      startQuizSession();
-      if(METRONOME.running) stopMetronome();
-    } else {
-      // start metronome automatically when training starts
-      if(!METRONOME.running) startMetronome();
-    }
-
-    // If metronome isn't running (or quiz), still do an immediate action
-    if(!METRONOME.running) runPracticeAction();
-
-  } else {
-    $("toggleBtn").textContent = "Start";
-    $("toggleBtn").classList.remove("running");
-    if(METRONOME.running) stopMetronome();
-  }
-
-  updateMetronomeConfigUI(true);
-});
-
-
-/* =====================================================================
-   Metronome -> Trainer hook
-   - Trainer listens to beat ticks and changes target when needed.
-   ===================================================================== */
-
-METRONOME.subscribers.push((p) => {
-  if(!tRunning) return;
-  if($("practiceType").value === "quiz") return;
-
-  // Only act on beat-start (subTick == 0)
-  if(p.subTick !== 0) return;
-
-  // Check switch rule
-  if(!shouldSwitchOnBeat(p.beat)) return;
-
-  // Freestyle does not auto-advance
-  if($("orderMode").value !== "freestyle"){
-    advanceTargetByOrder();
-  }
-
-  runPracticeAction();
-});
-
-
-/* =====================================================================
-   Init UI
-   ===================================================================== */
-tShowTarget();
-updateMetronomeConfigUI(true);
-
+window.addEventListener("load", init);
 </script>
+
+<!-- App Footer -->
+<div class="app-footer">
+  <span>© 2026 Practice Trainer</span>
+</div>
+
 </body>
 </html>
-
-
-
