@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Pro Practicer</title>
+<title>PRO PRACTICER</title>
 <style>
         :root {
             --bg-gradient-start: #f5f3ff;
@@ -1758,98 +1758,242 @@
   height: 52px;
   border-radius: 18px;
   border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.10);
+  background: color(green);
+  /*background: rgba(255,255,255,0.10);*/
   color: rgba(255,255,255,0.95);
   font-weight: 950;
   cursor:pointer;
 }
 .share-btn-wide:active{ transform: translateY(1px); }
 
-/* ===== Layout tweak: Bigger practice tile + smaller ramp tile (Page 1) ===== */
-#page1 .chord-display{
-  padding: 40px 36px !important;
-  border-radius: 32px !important;
-  margin-bottom: 28px !important;
+
+/* ===== Practice: current + upcoming ===== */
+#page1 .chord-main{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap: 8px;
 }
 
-#page1 .chord-top-row{ min-height: 84px !important; }
+#page1 .practice-next{
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  opacity: 0.72;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.14);
+}
 
-#page1 .chord-name.chord-center{
-  font-size: 56px !important;
-  letter-spacing: 0.6px !important;
+#page1 .practice-next::before{
+  content: "Next ";
+  opacity: 0.55;
+  margin-right: 6px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  #page1 .practice-next{ transition:none !important; }
+}
+
+/* ===== Practice tile: taller + smaller metronome indicator ===== */
+#page1 .chord-display{
+  min-height: 420px !important; /* make first tile longer */
 }
 
 #page1 .metronome-visual{
-  margin-top: 18px !important;
-  margin-bottom: 32px !important;
+  transform: scale(0.85);
+  transform-origin: center;
+  margin-top: 12px !important;
+  margin-bottom: 22px !important;
+}
+
+#page1 .metronome-dot{
+  width: 10px !important;
+  height: 10px !important;
+}
+
+#page1 .metronome-dot-inner{
+  width: 6px !important;
+  height: 6px !important;
+}
+
+#page1 .metronome-bar{
+  height: 8px !important;
+}
+
+
+
+/* ===== Practice tile layout: current center + next on right, bottom CTA ===== */
+#page1 .chord-display{
+  display: flex;
+  flex-direction: column;
+}
+
+#page1 .chord-top-row{
+  position: relative;
+}
+
+/* Center row: big current, small next on the right */
+#page1 .chord-main{
+  width: 100%;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+#page1 #chordName{
+  order: 1;
+  text-align: center;
+}
+
+#page1 #upcomingChord{
+  order: 2;
+}
+
+/* Next: compact pill on the right */
+#page1 .practice-next{
+  font-size: 13px;
+  font-weight: 900;
+  opacity: 0.72;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.14);
+  white-space: nowrap;
+  align-self: center;
+}
+
+/* Remove the 'Next' prefix (keep it clean) */
+#page1 .practice-next::before{ content: ""; }
+
+/* Bottom area: metronome indicator above, Start/Stop at very bottom */
+#page1 .practice-bottom{
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+#page1 .metronome-visual{
+  order: 1;
 }
 
 #page1 .start-stop-button{
-  padding: 24px 72px !important;
-  border-radius: 22px !important;
-  font-size: 22px !important;
-}
-
-/* Ramp mini card: make it compact */
-#page1 .ramp-panel{
-  padding: 14px 14px 12px !important;
-  border-radius: 20px !important;
-}
-
-#page1 .ramp-panel-header{
-  margin-bottom: 10px !important;
-  gap: 10px !important;
-}
-
-#page1 .ramp-panel-title{
-  font-size: 13px !important;
-  font-weight: 850 !important;
-}
-
-#page1 .ramp-panel-sub{
-  padding: 6px 10px !important;
-  font-size: 12px !important;
-}
-
-#page1 #rampChart{
-  height: 90px !important;   /* compact preview */
-  padding: 10px !important;
-  border-radius: 14px !important;
+  order: 2;
+  width: 100%;
 }
 
 
-
-/* ===== Header Tile (Theme-aware background) ===== */
-.header-tile{
-  margin-bottom: 16px;
-  padding: 14px 18px;
-  border-radius: 14px;
-  background: var(--header-bg, rgba(255,255,255,0.85));
-  border: 1px solid rgba(0,0,0,0.08);
-  color: var(--header-text, #111827);
+/* ===== Center current note vertically in practice tile ===== */
+#page1 .chord-display{
+  position: relative;
 }
 
-/* Dark theme override */
-body.dark .header-tile{
-  background: rgba(17,24,39,0.85);
-  border-color: rgba(255,255,255,0.12);
-  color: #f9fafb;
+#page1 .chord-main{
+  flex: 1 1 auto;
+  min-height: 200px;
+  display: flex !important;
+  align-items: center !important;   /* vertical center */
+  justify-content: center !important;
 }
 
-.header-title{
-  font-size: 16px;
-  font-weight: 900;
-  letter-spacing: 0.4px;
+/* Big current in absolute center */
+#page1 #chordName{
+  font-size: 56px;
+  font-weight: 950;
 }
 
-.header-subtitle{
-  margin-top: 2px;
-  font-size: 11px;
-  font-weight: 700;
+/* Upcoming stays to the right, vertically centered */
+#page1 #upcomingChord{
+  margin-left: 16px;
+  align-self: center;
+}
+
+
+/* ===== Move BPM pill to left corner (like scale pill style) ===== */
+#page1 .chord-top-row{
+  position: relative;
+}
+
+#page1 .meta-pill.meta-bpm{
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  margin: 0 !important;
+}
+
+
+/* ===== Practice center priority: current biggest, upcoming second ===== */
+#page1 .chord-main{
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 360px;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  text-align: center;
+}
+
+#page1 #chordName{
+  font-size: 114px !important;
+  font-weight: 950 !important;
+  line-height: 1.02 !important;
+  letter-spacing: 0.6px !important;
+}
+
+#page1 #upcomingChord.practice-next{
+  font-size: 48px !important;
+  font-weight: 900 !important;
+  opacity: 0.78 !important;
+  padding: 8px 14px !important;
+  border-radius: 999px !important;
+  white-space: nowrap;
+}
+
+/* Clean next label (optional) */
+#page1 #upcomingChord.practice-next::before{
+  content: "";
   opacity: 0.75;
+  margin-right: 6px;
+}
+
+/* ===== Ramp chart visibility toggle ===== */
+.hide-ramp-chart #rampPanel{
+  display: none !important;
+}
+
+/* Button sizing in toggle card */
+#rampChartToggleCard .btn-secondary{
+  width: 100%;
+  height: 48px;
+  border-radius: 14px;
+  font-weight: 950;
 }
 
 
+/* ===== Metronome settings: button row for Accent + Ramp Chart toggle ===== */
+#page2 .btn-row{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#page2 .btn-row > button{
+  flex: 1 1 0;
+  width: 0;
+}
+
+/* Make toggle look like accent, but distinct */
+#toggleRampChartBtn{
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.18);
+}
 </style>
 </head>
 <body>
@@ -1873,19 +2017,10 @@ body.dark .header-tile{
 <div class="pages-container" id="pagesContainer">
 <!-- Page 1: Practice -->
 <div class="page" id="page1">
-
-<!-- Header Tile -->
-<div class="header-tile">
-  <div class="header-title">Pro PRACTICER</div>
-  <div class="header-subtitle">Practice Makes Perfect   * by JVA</div>
-</div>
-
 <!-- Chord Display Tile -->
 <div class="chord-display">
 <div class="chord-top-row">
-<div class="chord-main">
-<div class="chord-name chord-center" id="chordName">C Major</div>
-</div>
+<div class="chord-main"><div class="chord-name chord-center" id="chordName">C Major</div><div class="practice-next" id="upcomingChord">D Minor</div></div>
 <div class="practice-meta practice-meta-corner">
 <div class="meta-pill meta-scale" id="scalePill">C Major</div>
 </div>
@@ -1895,11 +2030,10 @@ body.dark .header-tile{
 </div>
 </div>
 <!-- Metronome Visual -->
-<div class="metronome-visual" id="metronomeVisual">
-<!-- Beat indicators will be generated by JS -->
-</div>
 <!-- Start/Stop Button -->
-<button class="start-stop-button" id="startStopButton" onclick="togglePlay()">
+<div class="practice-bottom"><div class="metronome-visual" id="metronomeVisual">
+<!-- Beat indicators will be generated by JS -->
+</div><button class="start-stop-button" id="startStopButton" onclick="togglePlay()">
 <svg class="button-icon" fill="currentColor" id="playIcon" viewbox="0 0 20 20">
 <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path>
 </svg>
@@ -1907,8 +2041,7 @@ body.dark .header-tile{
 <svg class="button-icon" fill="currentColor" id="pauseIcon" style="display: none;" viewbox="0 0 20 20">
 <path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zM12.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z"></path>
 </svg>
-</button>
-</div>
+</button></div></div>
 <!-- Ramp Mini Chart (shown only when Ramp is ON) -->
 <div class="ramp-panel" id="rampMini" style="display:none;">
 <div class="ramp-panel-header">
@@ -2371,10 +2504,6 @@ function drawRampChart(){
   ctx.fill();
 }
 
-// Touch swipe (RIGHT -> next, LEFT -> previous)
-let touchStartX = 0;
-let touchEndX = 0;
-
 /* ===== Data for Profile ===== */
 let tasks = [
   { id: 1, title: 'Practice chord transitions', completed: false, priority: 'high' },
@@ -2411,18 +2540,6 @@ function toggleTheme() {
 }
 
 /* ===== Navigation ===== */
-function handleSwipe() {
-  const dx = touchEndX - touchStartX;
-  if (Math.abs(dx) < 75) return;
-
-  if (dx > 0) {
-    // Swipe RIGHT -> next
-    goToPage(Math.min(currentPage + 1, 2));
-  } else {
-    // Swipe LEFT -> previous
-    goToPage(Math.max(currentPage - 1, 0));
-  }
-}
 
 function goToPage(pageNum) {
   currentPage = pageNum;
@@ -2436,6 +2553,128 @@ function goToPage(pageNum) {
   const labels = ['Practice', 'Metronome', 'Profile'];
   document.getElementById('pageLabel').textContent = labels[currentPage];
 }
+/* ===== Natural swipe navigation (mobile-first) =====
+   Swipe LEFT  -> next page
+   Swipe RIGHT -> previous page
+   - Ignores vertical scrolling inside pages
+   - Supports “drag with finger” and snap
+*/
+function setupSwipeNavigation() {
+  const pc = document.getElementById('pagesContainer');
+  if (!pc) return;
+
+  let tracking = false;
+  let startX = 0, startY = 0;
+  let startTime = 0;
+  let isHorizontal = null; // null=undecided
+  const SLOP = 8;          // px before deciding gesture direction
+  const EDGE_RESIST = 0.35;
+  const SNAP_RATIO = 0.18; // % of screen width
+  const MIN_VEL = 450;     // px/sec
+
+  const ease = 'cubic-bezier(0.22, 1, 0.36, 1)';
+
+  const getW = () => pc.getBoundingClientRect().width || window.innerWidth;
+
+  const setTranslatePx = (px) => {
+    pc.style.transform = `translate3d(${px}px, 0, 0)`;
+  };
+
+  const snapToCurrent = () => {
+    // Keep goToPage as the single source of truth for indicators/labels.
+    goToPage(currentPage);
+  };
+
+  pc.addEventListener('touchstart', (e) => {
+    if (e.touches && e.touches.length > 1) return; // ignore pinch/zoom
+    tracking = true;
+    isHorizontal = null;
+    startX = (e.touches ? e.touches[0].clientX : e.clientX);
+    startY = (e.touches ? e.touches[0].clientY : e.clientY);
+    startTime = performance.now();
+    pc.style.transition = 'none';
+  }, { passive: true });
+
+  pc.addEventListener('touchmove', (e) => {
+    if (!tracking) return;
+    const x = e.touches[0].clientX;
+    const y = e.touches[0].clientY;
+    const dx = x - startX;
+    const dy = y - startY;
+
+    // Decide if this gesture is horizontal or vertical
+    if (isHorizontal === null) {
+      if (Math.abs(dx) < SLOP && Math.abs(dy) < SLOP) return;
+      isHorizontal = Math.abs(dx) > Math.abs(dy);
+    }
+
+    // If it’s vertical scrolling, let the page scroll naturally
+    if (!isHorizontal) return;
+
+    // Horizontal swipe: prevent page scroll and drag the pages container
+    e.preventDefault();
+
+    const w = getW();
+    let translate = (-currentPage * w) + dx;
+
+    // Rubber-band resistance on edges
+    if ((currentPage === 0 && dx > 0) || (currentPage === 2 && dx < 0)) {
+      translate = (-currentPage * w) + (dx * EDGE_RESIST);
+    }
+
+    setTranslatePx(translate);
+  }, { passive: false });
+
+  function finishSwipe(endClientX) {
+    pc.style.transition = `transform 0.35s ${ease}`;
+
+    if (!isHorizontal) {
+      snapToCurrent();
+      return;
+    }
+
+    const dx = endClientX - startX;
+    const w = getW();
+    const dt = Math.max(1, performance.now() - startTime);
+    const v = (dx / dt) * 1000; // px/sec
+
+    const threshold = w * SNAP_RATIO;
+
+    let next = currentPage;
+    if (dx <= -threshold || v <= -MIN_VEL) {
+      next = Math.min(currentPage + 1, 2); // swipe LEFT -> next
+    } else if (dx >= threshold || v >= MIN_VEL) {
+      next = Math.max(currentPage - 1, 0); // swipe RIGHT -> prev
+    }
+
+    goToPage(next);
+  }
+
+  pc.addEventListener('touchend', (e) => {
+    if (!tracking) return;
+    tracking = false;
+    const endX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : startX;
+    finishSwipe(endX);
+  }, { passive: true });
+
+  pc.addEventListener('touchcancel', () => {
+    tracking = false;
+    pc.style.transition = `transform 0.35s ${ease}`;
+    snapToCurrent();
+  }, { passive: true });
+
+  // Keep position correct after orientation change / resize
+  window.addEventListener('resize', () => {
+    pc.style.transition = 'none';
+    const w = getW();
+    setTranslatePx(-currentPage * w);
+    requestAnimationFrame(() => {
+      pc.style.transition = `transform 0.35s ${ease}`;
+      snapToCurrent();
+    });
+  });
+}
+
 
 /* ===== UI Expanders ===== */
 function toggleConfig(type) {
@@ -2537,7 +2776,43 @@ function updateChordLabel(){
 
 function setCurrentPracticeText(text){
   updateChordLabel();
-  document.getElementById("chordName").textContent = text;
+
+  const curEl = document.getElementById("chordName");
+  const nextEl = document.getElementById("upcomingChord");
+  const nextText = upcomingPracticeText();
+
+  if(curEl){
+    // Smooth swap animation for current
+    try{
+      curEl.animate(
+        [{ transform: "translateY(0)", opacity: 1 }, { transform: "translateY(-10px)", opacity: 0 }],
+        { duration: 140, easing: "ease-in" }
+      );
+    }catch(e){}
+    setTimeout(()=>{
+      curEl.textContent = text;
+      try{
+        curEl.animate(
+          [{ transform: "translateY(12px)", opacity: 0 }, { transform: "translateY(0)", opacity: 1 }],
+          { duration: 180, easing: "ease-out" }
+        );
+      }catch(e){}
+    }, 120);
+  }
+
+  if(nextEl){
+    // Smooth fade for upcoming
+    try{
+      nextEl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: "ease-in" });
+    }catch(e){}
+    setTimeout(()=>{
+      nextEl.textContent = nextText || "";
+      try{
+        nextEl.animate([{ opacity: 0 }, { opacity: 0.72 }], { duration: 180, easing: "ease-out" });
+      }catch(e){}
+    }, 110);
+  }
+
   speakIfNeeded(text);
 }
 
@@ -2564,6 +2839,8 @@ function updateScalePill(){
 }
 
 function refreshPractice(){
+  clearRandomPending();
+
   practiceList = buildPracticeList();
   practicePos = 0;
   practiceDir = 1;
@@ -2590,13 +2867,34 @@ function shouldSwitchOnBeat(beatNum){
 }
 
 /* ===== Order logic ===== */
+let pendingRandomNext = null; // used to keep Random 'Next' consistent
+
+function clearRandomPending(){
+  pendingRandomNext = null;
+}
+
+function ensureRandomPending(len){
+  if(len <= 0) { pendingRandomNext = 0; return; }
+  if(pendingRandomNext === null || pendingRandomNext >= len){
+    pendingRandomNext = Math.floor(Math.random() * len);
+  }
+}
+
 function nextIndex(len){
   const order = settings.practice.orderMode;
   if(len <= 0) return 0;
 
   if(order === "Random"){
-    return Math.floor(Math.random() * len);
+    // Use the queued next index so the UI "Next" matches what will actually play/speak.
+    ensureRandomPending(len);
+    const chosen = pendingRandomNext;
+    // Queue the following one for the next preview
+    pendingRandomNext = Math.floor(Math.random() * len);
+    return chosen;
   }
+  // leaving random? reset pending so it doesn't leak
+  clearRandomPending();
+
   if(order === "Ascending"){
     return (practicePos + 1) % len;
   }
@@ -2613,6 +2911,25 @@ function nextIndex(len){
   }
   return (practicePos + 1) % len;
 }
+
+function peekNextIndex(len){
+  const order = settings.practice.orderMode;
+  if(len <= 0) return 0;
+
+  if(order === "Random"){
+    ensureRandomPending(len);
+    return pendingRandomNext;
+  }
+  return nextIndex(len); // for non-random, preview is deterministic next step
+}
+
+function upcomingPracticeText(){
+  if(!practiceList || practiceList.length === 0) return "";
+  const idx = peekNextIndex(practiceList.length);
+  return practiceList[idx] || "";
+}
+
+
 
 /* ===== Metronome visuals ===== */
 function updateMetronomeVisual(containerId) {
@@ -3326,80 +3643,30 @@ async function shareWeeklyPdf(){
           .labels span{ width: 24px; text-align:center; }
           ul{ margin: 8px 0 0 18px; }
         
-/* ===== Layout tweak: Bigger practice tile + smaller ramp tile (Page 1) ===== */
+/* ===== Practice tile: taller + smaller metronome indicator ===== */
 #page1 .chord-display{
-  padding: 40px 36px !important;
-  border-radius: 32px !important;
-  margin-bottom: 28px !important;
-}
-
-#page1 .chord-top-row{ min-height: 84px !important; }
-
-#page1 .chord-name.chord-center{
-  font-size: 56px !important;
-  letter-spacing: 0.6px !important;
+  min-height: 420px !important; /* make first tile longer */
 }
 
 #page1 .metronome-visual{
-  margin-top: 18px !important;
-  margin-bottom: 32px !important;
+  transform: scale(0.85);
+  transform-origin: center;
+  margin-top: 12px !important;
+  margin-bottom: 22px !important;
 }
 
-#page1 .start-stop-button{
-  padding: 24px 72px !important;
-  border-radius: 22px !important;
-  font-size: 22px !important;
+#page1 .metronome-dot{
+  width: 10px !important;
+  height: 10px !important;
 }
 
-/* Ramp mini card: make it compact */
-#page1 .ramp-panel{
-  padding: 14px 14px 12px !important;
-  border-radius: 20px !important;
+#page1 .metronome-dot-inner{
+  width: 6px !important;
+  height: 6px !important;
 }
 
-#page1 .ramp-panel-header{
-  margin-bottom: 10px !important;
-  gap: 10px !important;
-}
-
-#page1 .ramp-panel-title{
-  font-size: 13px !important;
-  font-weight: 850 !important;
-}
-
-#page1 .ramp-panel-sub{
-  padding: 6px 10px !important;
-  font-size: 12px !important;
-}
-
-#page1 #rampChart{
-  height: 90px !important;   /* compact preview */
-  padding: 10px !important;
-  border-radius: 14px !important;
-}
-
-
-/* ===== Header Tile (Flat style) ===== */
-.header-tile{
-  margin-bottom: 16px;
-  padding: 14px 18px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: #ffffff;
-}
-
-.header-title{
-  font-size: 16px;
-  font-weight: 900;
-  letter-spacing: 0.4px;
-}
-
-.header-subtitle{
-  margin-top: 2px;
-  font-size: 11px;
-  font-weight: 700;
-  opacity: 0.7;
+#page1 .metronome-bar{
+  height: 8px !important;
 }
 
 </style>
@@ -3427,13 +3694,7 @@ async function shareWeeklyPdf(){
             ${days.map(d=>`<span>${d.date.toLocaleDateString(undefined,{weekday:'short'}).slice(0,3)}</span>`).join("")}
           </div>
         </div>
-      
-<!-- App Footer -->
-<div class="app-footer">
-  <span>© 2026 Practice Trainer</span>
-</div>
-
-</body>
+      </body>
       </html>
     `;
 
@@ -3828,80 +4089,70 @@ async function shareAchievementPdf(){
           .labels span{ width: 26px; text-align:center; }
           .goal{ color:#b45309; font-weight: 700; }
         
-/* ===== Layout tweak: Bigger practice tile + smaller ramp tile (Page 1) ===== */
+/* ===== Practice tile: taller + smaller metronome indicator ===== */
 #page1 .chord-display{
-  padding: 40px 36px !important;
-  border-radius: 32px !important;
-  margin-bottom: 28px !important;
-}
-
-#page1 .chord-top-row{ min-height: 84px !important; }
-
-#page1 .chord-name.chord-center{
-  font-size: 56px !important;
-  letter-spacing: 0.6px !important;
+  min-height: 420px !important; /* make first tile longer */
 }
 
 #page1 .metronome-visual{
-  margin-top: 18px !important;
-  margin-bottom: 32px !important;
+  transform: scale(0.85);
+  transform-origin: center;
+  margin-top: 12px !important;
+  margin-bottom: 22px !important;
 }
 
-#page1 .start-stop-button{
-  padding: 24px 72px !important;
-  border-radius: 22px !important;
-  font-size: 22px !important;
+#page1 .metronome-dot{
+  width: 10px !important;
+  height: 10px !important;
 }
 
-/* Ramp mini card: make it compact */
-#page1 .ramp-panel{
-  padding: 14px 14px 12px !important;
-  border-radius: 20px !important;
+#page1 .metronome-dot-inner{
+  width: 6px !important;
+  height: 6px !important;
 }
 
-#page1 .ramp-panel-header{
-  margin-bottom: 10px !important;
-  gap: 10px !important;
-}
-
-#page1 .ramp-panel-title{
-  font-size: 13px !important;
-  font-weight: 850 !important;
-}
-
-#page1 .ramp-panel-sub{
-  padding: 6px 10px !important;
-  font-size: 12px !important;
-}
-
-#page1 #rampChart{
-  height: 90px !important;   /* compact preview */
-  padding: 10px !important;
-  border-radius: 14px !important;
+#page1 .metronome-bar{
+  height: 8px !important;
 }
 
 
-/* ===== Header Tile (Flat style) ===== */
-.header-tile{
-  margin-bottom: 16px;
-  padding: 14px 18px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: #ffffff;
+/* ===== App Footer ===== */
+.app-footer{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255,255,255,0.12);
+  z-index: 9999;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-.header-title{
-  font-size: 16px;
-  font-weight: 900;
-  letter-spacing: 0.4px;
+.footer-content{
+  width: 100%;
+  max-width: 520px;
+  height: 100%;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 0 14px;
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.78);
+  letter-spacing: 0.35px;
 }
 
-.header-subtitle{
-  margin-top: 2px;
-  font-size: 11px;
-  font-weight: 700;
-  opacity: 0.7;
+.footer-left,.footer-center,.footer-right{ white-space: nowrap; }
+
+/* Ensure main swiper content is not hidden behind footer */
+#pagesContainer.pages-container{
+  padding-bottom: 44px;
 }
 
 </style>
@@ -3936,13 +4187,7 @@ async function shareAchievementPdf(){
             ${series.map(x=>`<span>${x.label.slice(0,3)}</span>`).join("")}
           </div>
         </div>
-      
-<!-- App Footer -->
-<div class="app-footer">
-  <span>© 2026 Practice Trainer</span>
-</div>
-
-</body>
+      </body>
       </html>
     `;
 
@@ -3966,6 +4211,28 @@ async function shareAchievementPdf(){
 }
 
 
+
+/* ===== Ramp chart show/hide (Page 2 control, affects Page 1) ===== */
+function getShowRampChart(){
+  const v = localStorage.getItem("showRampChart:v1");
+  if(v === null) return true; // default show
+  return v === "true";
+}
+function applyRampChartVisibility(){
+  const show = getShowRampChart();
+  document.body.classList.toggle("hide-ramp-chart", !show);
+
+  const btn = document.getElementById("toggleRampChartBtn");
+  if(btn){
+    btn.textContent = show ? "Hide Ramp Chart" : "Show Ramp Chart";
+  }
+}
+function toggleRampChartVisibility(){
+  const show = getShowRampChart();
+  localStorage.setItem("showRampChart:v1", String(!show));
+  applyRampChartVisibility();
+}
+
 /* ===== Init ===== */
 function init() {
   updateMetronomeVisual('metronomeVisual');
@@ -3973,9 +4240,7 @@ function init() {
   updateBeatIndicators();
 
   // hook touch swipe
-  const pc = document.getElementById('pagesContainer');
-  pc.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, {passive:true});
-  pc.addEventListener('touchend', (e) => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, {passive:true});
+  setupSwipeNavigation();
 
   // bind practice inputs
   bindPracticeInputs();
@@ -4026,9 +4291,13 @@ window.addEventListener("load", init);
 </script>
 
 <!-- App Footer -->
-<div class="app-footer">
-  <span>© 2026 Practice Trainer</span>
-</div>
+<footer class="app-footer" aria-label="App footer">
+  <div class="footer-content">
+    <span class="footer-left">Practice Trainer</span>
+    <span class="footer-center">© 2026</span>
+    <span class="footer-right">v1.0</span>
+  </div>
+</footer>
 
 </body>
 </html>
