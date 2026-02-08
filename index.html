@@ -1472,6 +1472,224 @@
   border-top: 2px solid var(--border-color);
 }
 
+/* === Game Mode Quiz Tile === */
+.game-tile {
+  background: var(--card-bg);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 40px -12px var(--shadow);
+  margin-bottom: 24px;
+  border: 2px solid var(--border-color);
+  transition: all 0.3s ease;
+  display: none; /* Hidden by default, shown when game mode active */
+}
+
+@media (min-width: 768px) {
+  .game-tile {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+}
+
+.game-tile.active {
+  display: block;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.game-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .game-title {
+    font-size: 18px;
+  }
+}
+
+.game-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--accent-primary);
+}
+
+.game-score {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.score-item {
+  text-align: center;
+}
+
+.score-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.score-value {
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.score-value.correct {
+  color: var(--accent-success);
+}
+
+.score-value.wrong {
+  color: var(--accent-danger);
+}
+
+.score-value.streak {
+  color: var(--accent-warning);
+}
+
+.game-question {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.question-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.question-text {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--accent-primary);
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .question-text {
+    font-size: 28px;
+  }
+}
+
+.game-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.game-option {
+  padding: 20px 16px;
+  border: 3px solid var(--border-color);
+  border-radius: 18px;
+  background: var(--card-bg);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+@media (min-width: 768px) {
+  .game-option {
+    padding: 16px 12px;
+    font-size: 14px;
+  }
+}
+
+.game-option:hover {
+  border-color: var(--accent-primary);
+  background: rgba(139, 92, 246, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.2);
+}
+
+.game-option:active {
+  transform: translateY(0);
+}
+
+.game-option.correct {
+  border-color: var(--accent-success);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+  animation: correctPulse 0.5s ease;
+}
+
+.game-option.wrong {
+  border-color: var(--accent-danger);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
+  animation: wrongShake 0.5s ease;
+}
+
+.game-option.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+@keyframes correctPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes wrongShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.game-feedback {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 14px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 15px;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.game-feedback.show {
+  opacity: 1;
+}
+
+.game-feedback.correct {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.15));
+  color: #047857;
+  border: 2px solid var(--accent-success);
+}
+
+.game-feedback.wrong {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.15));
+  color: #b91c1c;
+  border: 2px solid var(--accent-danger);
+}
+
+[data-theme="dark"] .game-feedback.correct {
+  color: #34d399;
+}
+
+[data-theme="dark"] .game-feedback.wrong {
+  color: #f87171;
+}
+
 .tasks-summary{
   display:flex;
   flex-direction:column;
@@ -1931,7 +2149,7 @@
 #page1 .chord-main{
   width: 100%;
   flex: 1 1 auto;
-  min-height: 360px;
+  min-height: 230px;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -1941,15 +2159,15 @@
 }
 
 #page1 #chordName{
-  font-size: 114px !important;
-  font-weight: 950 !important;
+  font-size: 104px !important;
+  font-weight: 900 !important;
   line-height: 1.02 !important;
   letter-spacing: 0.6px !important;
 }
 
 #page1 #upcomingChord.practice-next{
   font-size: 48px !important;
-  font-weight: 900 !important;
+  font-weight: 800 !important;
   opacity: 0.78 !important;
   padding: 8px 14px !important;
   border-radius: 999px !important;
@@ -2050,6 +2268,47 @@
 </div>
 <canvas height="78" id="rampChart" width="320"></canvas>
 </div>
+
+<!-- Game Mode Tile (shown only when Game mode is selected) -->
+<div class="game-tile" id="gameTile">
+  <div class="game-header">
+    <div class="game-title">
+      <svg class="game-icon" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM6.5 9a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm5 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm-6 4a.5.5 0 01.5-.5h8a.5.5 0 010 1H6a.5.5 0 01-.5-.5z"/>
+      </svg>
+      Quiz Mode
+    </div>
+    <div class="game-score">
+      <div class="score-item">
+        <div class="score-label">Correct</div>
+        <div class="score-value correct" id="scoreCorrect">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Wrong</div>
+        <div class="score-value wrong" id="scoreWrong">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Streak</div>
+        <div class="score-value streak" id="scoreStreak">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="game-question">
+    <div class="question-label" id="questionLabel">What is this chord?</div>
+    <div class="question-text" id="questionText">1</div>
+  </div>
+
+  <div class="game-options" id="gameOptions">
+    <button class="game-option" onclick="checkAnswer(0)">C Major</button>
+    <button class="game-option" onclick="checkAnswer(1)">D Minor</button>
+    <button class="game-option" onclick="checkAnswer(2)">E Minor</button>
+    <button class="game-option" onclick="checkAnswer(3)">F Major</button>
+  </div>
+
+  <div class="game-feedback" id="gameFeedback"></div>
+</div>
+
 <!-- Practice Configuration Tile -->
 <div class="config-tile">
 <div class="config-header" onclick="toggleConfig('practice')">
@@ -2376,6 +2635,17 @@ let beatIndex = 0;               // 0..beatsPerMeasure-1 (main beat)
 let practicePos = 0;
 let practiceDir = 1;
 let practiceList = [];
+
+// Game mode state
+let gameScore = {
+  correct: 0,
+  wrong: 0,
+  streak: 0,
+  currentStreak: 0
+};
+let gameCurrentQuestion = null;
+let gameCorrectAnswer = null;
+let gameOptions = [];
 
 // Settings (toggles + metronome options)
 const settings = {
@@ -2816,19 +3086,84 @@ function setCurrentPracticeText(text){
   speakIfNeeded(text);
 }
 
+
+/* ===== Speech (Chrome-safe) ===== */
+let speechReady = false;
+let speechVoices = [];
+let speechVoice = null;
+
+function loadVoices(){
+  try{
+    speechVoices = window.speechSynthesis.getVoices() || [];
+    // Prefer an English voice if available
+    speechVoice = speechVoices.find(v => /en(-|_)?/i.test(v.lang)) || speechVoices[0] || null;
+  }catch(e){
+    speechVoices = [];
+    speechVoice = null;
+  }
+}
+
+function primeSpeech(){
+  // Chrome often requires a user gesture before speech works.
+  if(!("speechSynthesis" in window)) return false;
+
+  try{
+    // Load voices (may be async on first run)
+    loadVoices();
+
+    // Resume if Chrome paused speech (common after tab switches)
+    if(window.speechSynthesis.paused) window.speechSynthesis.resume();
+
+    // Speak a tiny silent utterance to unlock audio pipeline
+    const u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0;           // silent
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    if(speechVoice) u.voice = speechVoice;
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+
+    speechReady = true;
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+// Some browsers populate voices asynchronously
+if("speechSynthesis" in window){
+  window.speechSynthesis.onvoiceschanged = () => {
+    loadVoices();
+  };
+}
+
+
 function speakIfNeeded(text){
   if(!settings.practice.noteSpeakEnabled) return;
   if(settings.practice.practiceMode !== "Speak note/number") return;
   if(!("speechSynthesis" in window)) return;
 
   try{
+    // If speech hasn't been unlocked yet, try (won't work without user gesture)
+    if(!speechReady) {
+      // This will succeed once the user has tapped Start/Stop at least once
+      primeSpeech();
+    }
+
+    // If still not ready, bail quietly
+    if(!speechReady) return;
+
+    if(window.speechSynthesis.paused) window.speechSynthesis.resume();
+
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
+    const u = new SpeechSynthesisUtterance(String(text || ""));
     u.rate = 1.0;
     u.pitch = 1.0;
     u.volume = 1.0;
+    if(speechVoice) u.voice = speechVoice;
     window.speechSynthesis.speak(u);
-  }catch{}
+  }catch(e){}
 }
 
 
@@ -2967,9 +3302,11 @@ function updateBeatIndicators() {
 let audioCtx = null;
 
 function ensureAudio(){
+  
   if(!audioCtx){
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+    try{ if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); }catch(e){}
+}
 }
 
 function toneToFreq(tone, accent){
@@ -3117,8 +3454,227 @@ function tickFromPos(pos){
 
 /* ===== Start/Stop button ===== */
 function togglePlay() {
+  // Unlock speech on first user tap (Chrome requirement)
+  try{ primeSpeech(); }catch(e){}
+
   if(isPlaying) stopEngine();
   else startEngine();
+}
+
+/* ===== Game Mode Functions ===== */
+function toggleGameMode() {
+  const gameTile = document.getElementById('gameTile');
+  const practiceMode = settings.practice.practiceMode;
+  
+  if (practiceMode === 'Game') {
+    gameTile.classList.add('active');
+    resetGameScore();
+    generateNewQuestion();
+  } else {
+    gameTile.classList.remove('active');
+  }
+}
+
+function resetGameScore() {
+  gameScore = {
+    correct: 0,
+    wrong: 0,
+    streak: 0,
+    currentStreak: 0
+  };
+  updateGameScoreDisplay();
+}
+
+function updateGameScoreDisplay() {
+  document.getElementById('scoreCorrect').textContent = gameScore.correct;
+  document.getElementById('scoreWrong').textContent = gameScore.wrong;
+  document.getElementById('scoreStreak').textContent = gameScore.streak;
+}
+
+function generateNewQuestion() {
+  if (practiceList.length === 0) {
+    practiceList = buildPracticeList();
+  }
+  
+  const displayType = settings.practice.displayType;
+  const isNashville = displayType === 'Nashville Number';
+  
+  // Pick a random chord/note from practice list
+  const correctIndex = Math.floor(Math.random() * practiceList.length);
+  gameCorrectAnswer = correctIndex;
+  
+  // Get the correct item
+  const correctItem = practiceList[correctIndex];
+  
+  // Get triads to convert between names and numbers
+  const triads = getDiatonicTriads(settings.practice.scaleRoot, settings.practice.scaleType);
+  
+  // Create question and answers - INVERTED LOGIC
+  if (isNashville) {
+    // Display type is Nashville Number, so QUESTION = NUMBER, ANSWERS = CHORD NAMES
+    document.getElementById('questionLabel').textContent = 'What chord is this number?';
+    document.getElementById('questionText').textContent = correctItem; // Show the number
+    gameOptions = generateChordNameOptions(correctIndex, triads);
+  } else {
+    // Display type is Notes/Chords, so QUESTION = CHORD NAME, ANSWERS = NUMBERS
+    document.getElementById('questionLabel').textContent = 'What number is this chord?';
+    document.getElementById('questionText').textContent = correctItem; // Show the chord name
+    gameOptions = generateNumberOptions(correctIndex, triads);
+  }
+  
+  // Display options
+  const optionsContainer = document.getElementById('gameOptions');
+  optionsContainer.innerHTML = '';
+  
+  gameOptions.forEach((option, index) => {
+    const button = document.createElement('button');
+    button.className = 'game-option';
+    button.textContent = option.text;
+    button.onclick = () => checkAnswer(index);
+    optionsContainer.appendChild(button);
+  });
+  
+  // Hide feedback
+  document.getElementById('gameFeedback').classList.remove('show', 'correct', 'wrong');
+}
+
+function generateChordNameOptions(correctIndex, triads) {
+  // Question is a NUMBER, show CHORD NAME choices
+  const options = [];
+  
+  // Add correct chord name
+  if (correctIndex >= 0 && correctIndex < triads.length) {
+    options.push({ text: triads[correctIndex].name, isCorrect: true });
+  }
+  
+  // Add 3 wrong chord names
+  const usedIndices = new Set([correctIndex]);
+  while (options.length < 4 && usedIndices.size < Math.min(4, triads.length)) {
+    const randomIndex = Math.floor(Math.random() * triads.length);
+    if (!usedIndices.has(randomIndex)) {
+      usedIndices.add(randomIndex);
+      options.push({ text: triads[randomIndex].name, isCorrect: false });
+    }
+  }
+  
+  // Shuffle options
+  return shuffleArray(options);
+}
+
+function generateNumberOptions(correctIndex, triads) {
+  // Question is a CHORD NAME, show NUMBER choices
+  const options = [];
+  
+  // Add correct number
+  if (correctIndex >= 0 && correctIndex < triads.length) {
+    options.push({ text: triads[correctIndex].nash, isCorrect: true });
+  }
+  
+  // Add 3 wrong numbers
+  const usedIndices = new Set([correctIndex]);
+  while (options.length < 4 && usedIndices.size < Math.min(4, triads.length)) {
+    const randomIndex = Math.floor(Math.random() * triads.length);
+    if (!usedIndices.has(randomIndex)) {
+      usedIndices.add(randomIndex);
+      options.push({ text: triads[randomIndex].nash, isCorrect: false });
+    }
+  }
+  
+  // Shuffle options
+  return shuffleArray(options);
+}
+
+function generateOptions(correctIndex, isNashville) {
+  // This function is no longer used - kept for compatibility
+  const options = [];
+  const correctItem = practiceList[correctIndex];
+  
+  // Add correct answer
+  if (isNashville) {
+    options.push({ text: correctItem, isCorrect: true });
+  } else {
+    options.push({ text: getChordFromNumber(correctItem), isCorrect: true });
+  }
+  
+  // Add 3 wrong answers
+  const usedIndices = new Set([correctIndex]);
+  while (options.length < 4 && usedIndices.size < Math.min(4, practiceList.length)) {
+    const randomIndex = Math.floor(Math.random() * practiceList.length);
+    if (!usedIndices.has(randomIndex)) {
+      usedIndices.add(randomIndex);
+      const wrongItem = practiceList[randomIndex];
+      
+      if (isNashville) {
+        options.push({ text: wrongItem, isCorrect: false });
+      } else {
+        options.push({ text: getChordFromNumber(wrongItem), isCorrect: false });
+      }
+    }
+  }
+  
+  // Shuffle options
+  return shuffleArray(options);
+}
+
+function getChordFromNumber(number) {
+  // Convert Nashville number to chord name
+  const triads = getDiatonicTriads(settings.practice.scaleRoot, settings.practice.scaleType);
+  const index = parseInt(number) - 1;
+  if (index >= 0 && index < triads.length) {
+    return triads[index].name;
+  }
+  return number; // fallback
+}
+
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function checkAnswer(selectedIndex) {
+  const selectedOption = gameOptions[selectedIndex];
+  const feedback = document.getElementById('gameFeedback');
+  const optionButtons = document.querySelectorAll('.game-option');
+  
+  // Disable all options
+  optionButtons.forEach(btn => btn.classList.add('disabled'));
+  
+  if (selectedOption.isCorrect) {
+    // Correct answer
+    optionButtons[selectedIndex].classList.add('correct');
+    gameScore.correct++;
+    gameScore.currentStreak++;
+    gameScore.streak = Math.max(gameScore.streak, gameScore.currentStreak);
+    
+    feedback.textContent = '✓ Correct! Well done! 🎉';
+    feedback.classList.add('show', 'correct');
+  } else {
+    // Wrong answer
+    optionButtons[selectedIndex].classList.add('wrong');
+    gameScore.wrong++;
+    gameScore.currentStreak = 0;
+    
+    // Highlight correct answer
+    gameOptions.forEach((opt, idx) => {
+      if (opt.isCorrect) {
+        optionButtons[idx].classList.add('correct');
+      }
+    });
+    
+    feedback.textContent = '✗ Oops! Try the next one!';
+    feedback.classList.add('show', 'wrong');
+  }
+  
+  updateGameScoreDisplay();
+  
+  // Generate new question after delay
+  setTimeout(() => {
+    generateNewQuestion();
+  }, 1500);
 }
 
 /* ===== Page 2 controls ===== */
@@ -3278,6 +3834,9 @@ function bindPracticeInputs(){
     settings.practice.customList = customList.value;  updateScalePill();
 
     customGroup.style.display = (settings.practice.orderMode === "Custom") ? "block" : "none";
+
+    // Toggle game mode
+    toggleGameMode();
 
     refreshPractice();
     if(isPlaying) restartEngine();
@@ -4293,8 +4852,8 @@ window.addEventListener("load", init);
 <!-- App Footer -->
 <footer class="app-footer" aria-label="App footer">
   <div class="footer-content">
-    <span class="footer-left">Practice Trainer</span>
-    <span class="footer-center">© 2026</span>
+    <span class="footer-left">Pro Practicer</span>
+    <span class="footer-center">© 2026 Jijo Antony</span>
     <span class="footer-right">v1.0</span>
   </div>
 </footer>
